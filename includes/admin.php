@@ -101,8 +101,10 @@ class Admin {
 	 * @return array Tme modified action links.
 	 */
 	public function plugin_action_links( $actions ) {
-		$url = esc_url( menu_page_url( static::PAGE, false ) );
-		array_unshift( $actions, sprintf( '<a href="%s">%s</a>', $url, __( 'Settings', 'plugin-text-domain' ) ) );
+		array_unshift( $actions, vsprintf( '<a href="%s">%s</a>', array(
+			esc_url( menu_page_url( static::PAGE, false ) ),
+			esc_html__( 'Settings', 'plugin-text-domain' ),
+		) ) );
 		return $actions;
 	}
 
