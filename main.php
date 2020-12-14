@@ -1,10 +1,10 @@
 <?php namespace peroks\plugin_customer\plugin_package;
 /*
- * Plugin Name:       This Plugin Name
+ * Plugin Name:       [This Plugin Name]
  * Plugin URI:        https://github.com/Peroks-01/wp-plugin-template
- * Description:       This plugin description
+ * Description:       [This plugin description]
  *
- * Text Domain:       plugin-text-domain
+ * Text Domain:       [plugin-text-domain]
  * Domain Path:       /languages
  *
  * Author:            Per Egil Roksvaag
@@ -18,7 +18,7 @@
  */
 
 /**
- * The This Plugin Name plugin main class.
+ * The [This Plugin Name] plugin main class.
  *
  * @since 1.0.0
  * @author Per Egil Roksvaag
@@ -26,43 +26,56 @@
  */
 class Main {
 	/**
-	 * @var string The plugin version.
-	 */
-	const VERSION = '1.0.0';
-
-	/**
 	 * @var string The plugin file.
 	 */
 	const FILE = __FILE__;
 
 	/**
+	 * Should be identical to "Plugin Name" in the plugin header comment above.
+	 *
 	 * @var string The plugin name.
+	 * @todo Globally search and replace this with your own plugin name.
 	 */
-	const NAME = 'This Plugin Name';
+	const NAME = '[This Plugin Name]';
 
 	/**
+	 * Must be identical to "Domain Path" in the plugin header comment above.
+	 * Use lowercase and hyphens as word breaker.
+	 *
 	 * @var string The plugin text domain (hyphen).
+	 * @todo Globally search and replace this with your own unique text domain
 	 */
-	const DOMAIN = 'plugin-text-domain';
+	const DOMAIN = '[plugin-text-domain]';
 
 	/**
+	 * Should be similar to self::DOMAIN, only with underscores instead of hyphens.
+	 * Use lowercase and underscores as word breaker.
+	 *
 	 * @var string The plugin prefix (underscore).
+	 * @todo Replace this constant with your own unique plugin prefix.
 	 */
 	const PREFIX = 'plugin_prefix';
 
 	/**
+	 * Should contain the "Version" field in the plugin header comment above.
+	 *
+	 * @var string The plugin version.
+	 * @todo Set your plugin version number.
+	 */
+	const VERSION = '1.0.0';
+
+	/**
+	 * Only requirement constants > '0' will be checked.
+	 *
 	 * @var string The system environment requirements.
+	 * @todo Replace this with the system requirements of your owe plugin.
+	 * @see Main::check() below and possibly add/remove system checks and constants.
 	 */
 	const REQUIRE_PHP  = '7.0';	//	Required PHP version
 	const REQUIRE_WP   = '5.0';	//	Required WordPress version
 	const REQUIRE_WOO  = '0';	//	Required WooCommerce version
 	const REQUIRE_LMS  = '0';	//	Required LearnDash LMS version
 	const REQUIRE_WPML = '0';	//	Required WordPress Multilingual version
-
-	/**
-	 * @var string The plugin global options.
-	 */
-	const OPTION_VERSION = self::PREFIX . '_version';
 
 	/**
 	 * @var string The plugin global action hooks.
@@ -82,6 +95,11 @@ class Main {
 	const FILTER_SYSTEM_CHECK  = self::PREFIX . '_system_check';
 	const FILTER_PLUGIN_PATH   = self::PREFIX . '_plugin_path';
 	const FILTER_PLUGIN_URL    = self::PREFIX . '_plugin_url';
+
+	/**
+	 * @var string The plugin global options.
+	 */
+	const OPTION_VERSION = self::PREFIX . '_version';
 
 	/**
 	 * @var object The class singleton.
@@ -114,6 +132,7 @@ class Main {
 	 * Registers autoloading.
 	 *
 	 * @since 1.0.0
+	 * @todo Add your own plugin classes and their file system paths here.
 	 */
 	protected function autoload() {
 		$classes = apply_filters( static::FILTER_CLASS_PATH, array(
@@ -133,7 +152,10 @@ class Main {
 	/**
 	 * Loads and runs the plugin classes.
 	 *
+	 * You must register your classes for autoloading (above) before you can run them here.
+	 *
 	 * @since 1.0.0
+	 * @todo Add your own plugin classes.
 	 */
 	protected function run() {
 		Setup::instance();
@@ -144,20 +166,12 @@ class Main {
 		}
 	}
 
-	/* =========================================================================
-	 * Everything below this line is just plugin management and some very
-	 * basic path and url handlers. You'll find the real action in the classes
-	 * loaded above.
-	 * ====================================================================== */
-
-	/* -------------------------------------------------------------------------
-	 * Check system requirements
-	 * ---------------------------------------------------------------------- */
-
 	/**
 	 * Checks if the system environment is supported.
 	 *
 	 * @since 1.0.0
+	 * @todo Add/remove system environment checks for your plugin.
+	 *
 	 * @return bool True if the system environment is supported, false otherwise.
 	 */
 	protected static function check() {
@@ -198,6 +212,16 @@ class Main {
 		return empty( $error );
 	}
 
+	/* =========================================================================
+	 * Everything below this line is just plugin management and some very
+	 * basic path and url handlers. You'll find the real action in the classes
+	 * loaded above.
+	 * ====================================================================== */
+
+	/* -------------------------------------------------------------------------
+	 * Error handling
+	 * ---------------------------------------------------------------------- */
+
 	/**
 	 * Logs and outputs missing system requirements.
 	 *
@@ -211,13 +235,13 @@ class Main {
 			if ( is_admin() ) {
 
 				//	Error message
-				$message = __( '%1$s requires %2$s version %3$s or higher, the plugin is NOT RUNNING.', 'plugin-text-domain' );
+				$message = __( '%1$s requires %2$s version %3$s or higher, the plugin is NOT RUNNING.', '[plugin-text-domain]' );
 				$message = sprintf( $message, static::NAME, $require, $version );
 
 				//	Admin notice output
 				$notice = function () use ( $message ) {
 					vprintf( '<div class="notice notice-error"><p><strong>%s: </strong>%s</p></div>', array(
-						esc_html__( 'Error', 'plugin-text-domain' ),
+						esc_html__( 'Error', '[plugin-text-domain]' ),
 						esc_html( $message ),
 					) );
 				};
@@ -252,7 +276,7 @@ class Main {
 
 			add_action( 'wp_loaded', 'flush_rewrite_rules' );
 			add_action( 'admin_notices', function () {
-				$notice = __( '%s has been updated to version %s', 'plugin-text-domain' );
+				$notice = __( '%s has been updated to version %s', '[plugin-text-domain]' );
 				$notice = sprintf( $notice, static::NAME, static::VERSION );
 				printf( '<div class="notice notice-success is-dismissible"><p>%s.</p></div>', esc_html( $notice ) );
 				error_log( $notice );
@@ -288,7 +312,7 @@ class Main {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
 			do_action( static::ACTION_ACTIVATE, static::instance(), static::VERSION, get_option( static::OPTION_VERSION ) );
 			update_option( static::OPTION_VERSION, static::VERSION );
-			$message = __( '%s version %s has been activated', 'plugin-text-domain' );
+			$message = __( '%s version %s has been activated', '[plugin-text-domain]' );
 			error_log( sprintf( $message, static::NAME, static::VERSION ) );
 			flush_rewrite_rules();
 		}
@@ -304,7 +328,7 @@ class Main {
 	public static function deactivate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
 			do_action( static::ACTION_DEACTIVATE, static::instance(), static::VERSION, get_option( static::OPTION_VERSION ) );
-			$message = __( '%s version %s has been deactivated', 'plugin-text-domain' );
+			$message = __( '%s version %s has been deactivated', '[plugin-text-domain]' );
 			error_log( sprintf( $message, static::NAME, static::VERSION ) );
 			flush_rewrite_rules();
 		}
@@ -321,7 +345,7 @@ class Main {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
 			do_action( static::ACTION_DELETE, static::instance(), static::VERSION, get_option( static::OPTION_VERSION ) );
 			delete_option( static::OPTION_VERSION );
-			$message = __( '%s version %s has been removed', 'plugin-text-domain' );
+			$message = __( '%s version %s has been removed', '[plugin-text-domain]' );
 			error_log( sprintf( $message, static::NAME, static::VERSION ) );
 			flush_rewrite_rules();
 		}

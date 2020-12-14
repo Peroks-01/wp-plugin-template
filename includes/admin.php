@@ -19,10 +19,16 @@ class Admin {
 	const CAPABILITY = 'manage_options';
 
 	/**
+	 * @var string Admin settings
+	 */
+	const SECTION_DELETE         = Main::PREFIX . '_delete';
+	const OPTION_DELETE_SETTINGS = self::SECTION_DELETE . '_settings';
+
+	/**
 	 * Constructor.
 	 */
 	protected function __construct() {
-		$base = plugin_basename( Main::FILE );
+		$name = plugin_basename( Main::FILE );
 
 		//	Adds a top level or a submenu page to the admin menu (or both).
 		add_action( 'admin_menu', array( $this, 'admin_top_menu' ) );
@@ -30,7 +36,12 @@ class Admin {
 
 		//	Displays a "Settings" and a "Support" link on the Plugins page.
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
-		add_filter( "plugin_action_links_{$base}", array( $this, 'plugin_action_links' ) );
+		add_filter( "plugin_action_links_{$name}", array( $this, 'plugin_action_links' ) );
+
+		//	Admin settings
+		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_action( Main::ACTION_ACTIVATE, array( $this, 'activate' ) );
+		add_action( Main::ACTION_DELETE, array( $this, 'delete' ), 100 );
 	}
 
 	/* -------------------------------------------------------------------------
@@ -43,7 +54,7 @@ class Admin {
 	 * @since 1.0.0
 	 */
 	public function admin_top_menu() {
-		$title = __( 'This Plugin Name settings', 'plugin-text-domain' );
+		$title = __( '[This Plugin Name] settings', '[plugin-text-domain]' );
 		$page  = add_menu_page(
 			$title,									//	Page title
 			Main::NAME,								//	Menu title
@@ -62,7 +73,7 @@ class Admin {
 	 * @since 1.0.0
 	 */
 	public function admin_sub_menu() {
-		$title = __( 'This Plugin Name settings', 'plugin-text-domain' );
+		$title = __( '[This Plugin Name] settings', '[plugin-text-domain]' );
 		$page  = add_submenu_page(
 			'options-general.php',					//	Parent page slug
 			$title,									//	Page title
@@ -87,7 +98,7 @@ class Admin {
 		if ( plugin_basename( Main::FILE ) === $file ) {
 			$links[] = vsprintf( '<a href="%s" target="_blank">%s</a>', array(
 				esc_url( 'https://codeable.io/developers/per-egil-roksvaag/' ),
-				esc_html__( 'Support', 'plugin-text-domain' ),
+				esc_html__( 'Support', '[plugin-text-domain]' ),
 			) );
 		}
 		return $links;
@@ -103,7 +114,7 @@ class Admin {
 	public function plugin_action_links( $actions ) {
 		array_unshift( $actions, vsprintf( '<a href="%s">%s</a>', array(
 			esc_url( menu_page_url( static::PAGE, false ) ),
-			esc_html__( 'Settings', 'plugin-text-domain' ),
+			esc_html__( 'Settings', '[plugin-text-domain]' ),
 		) ) );
 		return $actions;
 	}
@@ -133,6 +144,64 @@ class Admin {
 
 			printf( '</form>' );
 			printf( '</div>' );
+		}
+	}
+
+	/* -------------------------------------------------------------------------
+	 * Admin setting
+	 * ---------------------------------------------------------------------- */
+
+	/**
+	 * Registers settings, sections and fields.
+	 *
+	 * @since 1.0.0
+	 */
+	public function admin_init() {
+
+		// Assets section
+		$this->add_section( array(
+			'section'     => static::SECTION_DELETE,
+			'page'        => static::PAGE,
+			'label'       => __( 'DANGER ZONE!', '[plugin-text-domain]' ),
+			'description' => vsprintf( '<p>%s %s</p>', array(
+				esc_html__( 'Check the below checkbox to also delete all plugin data and settings when this plugin is deleted.', '[plugin-text-domain]' ),
+				esc_html__( 'Only do this if you do not intend to use this plugin again, all your data and settings will be lost.', '[plugin-text-domain]' ),
+			) ),
+		) );
+
+		//	Inline stylesheets
+		$this->add_checkbox( array(
+			'option'      => static::OPTION_DELETE_SETTINGS,
+			'section'     => static::SECTION_DELETE,
+			'page'        => static::PAGE,
+			'label'       => __( 'Also delete plugin data', '[plugin-text-domain]' ),
+			'description' => __( 'Check to also delete all plugin data and settings when deleting this plugin.', '[plugin-text-domain]' ),
+		) );
+	}
+
+	/**
+	 * Sets plugin default setting on activation.
+	 *
+	 * @since 1.0.0
+	 */
+	public function activate() {
+		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
+			if ( is_null( get_option( static::OPTION_DELETE_SETTINGS, null ) ) ) {
+				add_option( static::OPTION_DELETE_SETTINGS, 0 );
+			}
+		}
+	}
+
+	/**
+	 * Removes settings on plugin deletion.
+	 *
+	 * @since 1.0.0
+	 */
+	public function delete() {
+		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
+			if ( get_option( static::OPTION_DELETE_SETTINGS ) ) {
+				delete_option( static::OPTION_DELETE_SETTINGS );
+			}
 		}
 	}
 

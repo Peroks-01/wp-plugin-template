@@ -220,9 +220,9 @@ class Asset {
 		Admin::instance()->add_section( array(
 			'section'     => static::SECTION_ASSET,
 			'page'        => Admin::PAGE,
-			'label'       => __( 'Asset settings', 'plugin-text-domain' ),
+			'label'       => __( 'Asset settings', '[plugin-text-domain]' ),
 			'description' => vsprintf( '<p>%s</p>', array(
-				esc_html__( 'Check the below checkboxes to improve asset performance.', 'plugin-text-domain' ),
+				esc_html__( 'Check the below checkboxes to improve asset performance.', '[plugin-text-domain]' ),
 			) ),
 		) );
 
@@ -231,8 +231,8 @@ class Asset {
 			'option'      => static::OPTION_ASSET_STYLE_INLINE,
 			'section'     => static::SECTION_ASSET,
 			'page'        => Admin::PAGE,
-			'label'       => __( 'Inline stylesheets', 'plugin-text-domain' ),
-			'description' => __( 'Check to enable stylesheet inlining.', 'plugin-text-domain' ),
+			'label'       => __( 'Inline stylesheets', '[plugin-text-domain]' ),
+			'description' => __( 'Check to enable stylesheet inlining.', '[plugin-text-domain]' ),
 		) );
 
 		//	Defer JavaScript
@@ -240,13 +240,13 @@ class Asset {
 			'option'      => static::OPTION_ASSET_SCRIPT_DEFER,
 			'section'     => static::SECTION_ASSET,
 			'page'        => Admin::PAGE,
-			'label'       => __( 'Defer JavaScript', 'plugin-text-domain' ),
-			'description' => __( 'Check to enable deferred or async JavasScript.', 'plugin-text-domain' ),
+			'label'       => __( 'Defer JavaScript', '[plugin-text-domain]' ),
+			'description' => __( 'Check to enable deferred or async JavasScript.', '[plugin-text-domain]' ),
 		) );
 	}
 
 	/**
-	 * Sets plugin default setting on activation.
+	 * Sets plugin default settings on activation.
 	 *
 	 * @since 1.0.0
 	 */
@@ -268,8 +268,10 @@ class Asset {
 	 */
 	public function delete() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
-			delete_option( static::OPTION_ASSET_STYLE_INLINE );
-			delete_option( static::OPTION_ASSET_SCRIPT_DEFER );
+			if ( get_option( Admin::OPTION_DELETE_SETTINGS ) ) {
+				delete_option( static::OPTION_ASSET_STYLE_INLINE );
+				delete_option( static::OPTION_ASSET_SCRIPT_DEFER );
+			}
 		}
 	}
 }

@@ -1,6 +1,6 @@
-# This Plugin Name 
+# [This Plugin Name] 
 
-This plugin description
+[This plugin description]
 
 ## Plugin home
 * https://github.com/Peroks-01/wp-plugin-template
