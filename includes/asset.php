@@ -17,7 +17,7 @@ class Asset {
 	const DIR_SCRIPTS = 'assets/js';
 
 	/**
-	 * @var string The plugin global filter hooks.
+	 * @var string The class filter hooks.
 	 */
 	const FILTER_ENQUEUE_STYLE  = Main::PREFIX . '_enqueue_style';
 	const FILTER_ENQUEUE_SCRIPT = Main::PREFIX . '_enqueue_script';

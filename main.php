@@ -161,15 +161,17 @@ class Main {
 	 * @return bool True if the system environment is supported, false otherwise.
 	 */
 	protected static function check() {
+		$error = false;
+
 		if ( defined( 'static::REQUIRE_PHP' ) && static::REQUIRE_PHP ) {
 			if ( version_compare( PHP_VERSION, static::REQUIRE_PHP ) < 0 ) {
-				$error = static::error( 'PHP', static::REQUIRE_PHP );
+				$error = static::error( 'PHP', static::REQUIRE_PHP ) || $error;
 			}
 		}
 
 		if ( defined( 'static::REQUIRE_WP' ) && static::REQUIRE_WP ) {
 			if ( version_compare( get_bloginfo( 'version' ), static::REQUIRE_WP ) < 0 ) {
-				$error = static::error( 'WordPress', static::REQUIRE_WP );
+				$error = static::error( 'WordPress', static::REQUIRE_WP ) || $error;
 			}
 		}
 
@@ -177,19 +179,19 @@ class Main {
 			global $woocommerce;
 
 			if ( empty( is_a( $woocommerce, 'WooCommerce' ) ) || version_compare( $woocommerce->version, static::REQUIRE_WOO ) < 0 ) {
-				$error = static::error( 'WooCommerce', static::REQUIRE_WOO );
+				$error = static::error( 'WooCommerce', static::REQUIRE_WOO ) || $error;
 			}
 		}
 
 		if ( defined( 'static::REQUIRE_LMS' ) && static::REQUIRE_LMS ) {
 			if ( empty( defined( '\LEARNDASH_VERSION' ) ) || version_compare( \LEARNDASH_VERSION, static::REQUIRE_LMS ) < 0 ) {
-				$error = static::error( 'LearnDash LMS', static::REQUIRE_LMS );
+				$error = static::error( 'LearnDash LMS', static::REQUIRE_LMS ) || $error;
 			}
 		}
 
 		if ( defined( 'static::REQUIRE_WPML' ) && static::REQUIRE_WPML ) {
 			if ( empty( defined( '\ICL_SITEPRESS_VERSION' ) ) || version_compare( \ICL_SITEPRESS_VERSION, static::REQUIRE_WPML ) < 0 ) {
-				$error = static::error( 'WPML (WordPress Multilingual)', static::REQUIRE_WPML );
+				$error = static::error( 'WPML (WordPress Multilingual)', static::REQUIRE_WPML ) || $error;
 			}
 		}
 
