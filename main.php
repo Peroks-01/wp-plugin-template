@@ -112,9 +112,9 @@ class Main {
 	public static function instance() {
 		if ( is_null( static::$_instance ) && static::check() ) {
 			static::$_instance = false;
-			$class             = apply_filters( static::FILTER_CLASS_CREATE, static::class );
-			static::$_instance = apply_filters( static::FILTER_CLASS_CREATED, new $class(), $class, static::class );
-			do_action( static::ACTION_LOADED, static::$_instance );
+			$class             = apply_filters( self::FILTER_CLASS_CREATE, static::class );
+			static::$_instance = apply_filters( self::FILTER_CLASS_CREATED, new $class(), $class, static::class );
+			do_action( self::ACTION_LOADED, static::$_instance );
 		}
 		return static::$_instance;
 	}
@@ -135,7 +135,7 @@ class Main {
 	 * @todo Add your own plugin classes and their file system paths here.
 	 */
 	protected function autoload() {
-		$classes = apply_filters( static::FILTER_CLASS_PATH, array(
+		$classes = apply_filters( self::FILTER_CLASS_PATH, array(
 			__NAMESPACE__ . '\Singleton' => static::plugin_path( 'includes/singleton.php' ),
 			__NAMESPACE__ . '\Setup'     => static::plugin_path( 'includes/setup.php' ),
 			__NAMESPACE__ . '\Asset'     => static::plugin_path( 'includes/asset.php' ),
@@ -177,35 +177,35 @@ class Main {
 	protected static function check() {
 		$error = false;
 
-		if ( defined( 'static::REQUIRE_PHP' ) && static::REQUIRE_PHP ) {
-			if ( version_compare( PHP_VERSION, static::REQUIRE_PHP ) < 0 ) {
-				$error = static::error( 'PHP', static::REQUIRE_PHP ) || $error;
+		if ( defined( 'self::REQUIRE_PHP' ) && self::REQUIRE_PHP ) {
+			if ( version_compare( PHP_VERSION, self::REQUIRE_PHP ) < 0 ) {
+				$error = static::error( 'PHP', self::REQUIRE_PHP ) || $error;
 			}
 		}
 
-		if ( defined( 'static::REQUIRE_WP' ) && static::REQUIRE_WP ) {
-			if ( version_compare( get_bloginfo( 'version' ), static::REQUIRE_WP ) < 0 ) {
-				$error = static::error( 'WordPress', static::REQUIRE_WP ) || $error;
+		if ( defined( 'self::REQUIRE_WP' ) && self::REQUIRE_WP ) {
+			if ( version_compare( get_bloginfo( 'version' ), self::REQUIRE_WP ) < 0 ) {
+				$error = static::error( 'WordPress', self::REQUIRE_WP ) || $error;
 			}
 		}
 
-		if ( defined( 'static::REQUIRE_WOO' ) && static::REQUIRE_WOO ) {
+		if ( defined( 'self::REQUIRE_WOO' ) && self::REQUIRE_WOO ) {
 			global $woocommerce;
 
-			if ( empty( is_a( $woocommerce, 'WooCommerce' ) ) || version_compare( $woocommerce->version, static::REQUIRE_WOO ) < 0 ) {
-				$error = static::error( 'WooCommerce', static::REQUIRE_WOO ) || $error;
+			if ( empty( is_a( $woocommerce, 'WooCommerce' ) ) || version_compare( $woocommerce->version, self::REQUIRE_WOO ) < 0 ) {
+				$error = static::error( 'WooCommerce', self::REQUIRE_WOO ) || $error;
 			}
 		}
 
-		if ( defined( 'static::REQUIRE_LMS' ) && static::REQUIRE_LMS ) {
-			if ( empty( defined( '\LEARNDASH_VERSION' ) ) || version_compare( \LEARNDASH_VERSION, static::REQUIRE_LMS ) < 0 ) {
-				$error = static::error( 'LearnDash LMS', static::REQUIRE_LMS ) || $error;
+		if ( defined( 'self::REQUIRE_LMS' ) && self::REQUIRE_LMS ) {
+			if ( empty( defined( '\LEARNDASH_VERSION' ) ) || version_compare( \LEARNDASH_VERSION, self::REQUIRE_LMS ) < 0 ) {
+				$error = static::error( 'LearnDash LMS', self::REQUIRE_LMS ) || $error;
 			}
 		}
 
-		if ( defined( 'static::REQUIRE_WPML' ) && static::REQUIRE_WPML ) {
-			if ( empty( defined( '\ICL_SITEPRESS_VERSION' ) ) || version_compare( \ICL_SITEPRESS_VERSION, static::REQUIRE_WPML ) < 0 ) {
-				$error = static::error( 'WPML (WordPress Multilingual)', static::REQUIRE_WPML ) || $error;
+		if ( defined( 'self::REQUIRE_WPML' ) && self::REQUIRE_WPML ) {
+			if ( empty( defined( '\ICL_SITEPRESS_VERSION' ) ) || version_compare( \ICL_SITEPRESS_VERSION, self::REQUIRE_WPML ) < 0 ) {
+				$error = static::error( 'WPML (WordPress Multilingual)', self::REQUIRE_WPML ) || $error;
 			}
 		}
 
@@ -231,12 +231,12 @@ class Main {
 	 * @return bool True, except when overridden by filter.
 	 */
 	protected static function error( $require, $version ) {
-		if ( apply_filters( static::FILTER_SYSTEM_CHECK, true, $require, $version ) ) {
+		if ( apply_filters( self::FILTER_SYSTEM_CHECK, true, $require, $version ) ) {
 			if ( is_admin() ) {
 
 				//	Error message
 				$message = __( '%1$s requires %2$s version %3$s or higher, the plugin is NOT RUNNING.', '[plugin-text-domain]' );
-				$message = sprintf( $message, static::NAME, $require, $version );
+				$message = sprintf( $message, self::NAME, $require, $version );
 
 				//	Admin notice output
 				$notice = function () use ( $message ) {
@@ -268,16 +268,16 @@ class Main {
 	 * @return bool True if the plugin was updated, false otherwise.
 	 */
 	protected function update() {
-		$version = get_option( static::OPTION_VERSION );
+		$version = get_option( self::OPTION_VERSION );
 
-		if ( static::VERSION !== $version ) {
-			do_action( static::ACTION_UPDATE, $this, static::VERSION, $version );
-			update_option( static::OPTION_VERSION, static::VERSION );
+		if ( self::VERSION !== $version ) {
+			do_action( self::ACTION_UPDATE, $this, self::VERSION, $version );
+			update_option( self::OPTION_VERSION, self::VERSION );
 
 			add_action( 'wp_loaded', 'flush_rewrite_rules' );
 			add_action( 'admin_notices', function () {
 				$notice = __( '%s has been updated to version %s', '[plugin-text-domain]' );
-				$notice = sprintf( $notice, static::NAME, static::VERSION );
+				$notice = sprintf( $notice, self::NAME, self::VERSION );
 				printf( '<div class="notice notice-success is-dismissible"><p>%s.</p></div>', esc_html( $notice ) );
 				error_log( $notice );
 			} );
@@ -293,9 +293,9 @@ class Main {
 	 */
 	public static function register() {
 		if ( is_admin() ) {
-			register_activation_hook( static::FILE, array( static::class, 'activate' ) );
-			register_deactivation_hook( static::FILE, array( static::class, 'deactivate' ) );
-			register_uninstall_hook( static::FILE, array( static::class, 'uninstall' ) );
+			register_activation_hook( self::FILE, array( static::class, 'activate' ) );
+			register_deactivation_hook( self::FILE, array( static::class, 'deactivate' ) );
+			register_uninstall_hook( self::FILE, array( static::class, 'uninstall' ) );
 		}
 	}
 
@@ -310,10 +310,10 @@ class Main {
 	 */
 	public static function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
-			do_action( static::ACTION_ACTIVATE, static::instance(), static::VERSION, get_option( static::OPTION_VERSION ) );
-			update_option( static::OPTION_VERSION, static::VERSION );
+			do_action( self::ACTION_ACTIVATE, static::instance(), self::VERSION, get_option( self::OPTION_VERSION ) );
+			update_option( self::OPTION_VERSION, self::VERSION );
 			$message = __( '%s version %s has been activated', '[plugin-text-domain]' );
-			error_log( sprintf( $message, static::NAME, static::VERSION ) );
+			error_log( sprintf( $message, self::NAME, self::VERSION ) );
 			flush_rewrite_rules();
 		}
 	}
@@ -327,9 +327,9 @@ class Main {
 	 */
 	public static function deactivate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
-			do_action( static::ACTION_DEACTIVATE, static::instance(), static::VERSION, get_option( static::OPTION_VERSION ) );
+			do_action( self::ACTION_DEACTIVATE, static::instance(), self::VERSION, get_option( self::OPTION_VERSION ) );
 			$message = __( '%s version %s has been deactivated', '[plugin-text-domain]' );
-			error_log( sprintf( $message, static::NAME, static::VERSION ) );
+			error_log( sprintf( $message, self::NAME, self::VERSION ) );
 			flush_rewrite_rules();
 		}
 	}
@@ -343,10 +343,10 @@ class Main {
 	 */
 	public static function uninstall() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
-			do_action( static::ACTION_DELETE, static::instance(), static::VERSION, get_option( static::OPTION_VERSION ) );
-			delete_option( static::OPTION_VERSION );
+			do_action( self::ACTION_DELETE, static::instance(), self::VERSION, get_option( self::OPTION_VERSION ) );
+			delete_option( self::OPTION_VERSION );
 			$message = __( '%s version %s has been removed', '[plugin-text-domain]' );
-			error_log( sprintf( $message, static::NAME, static::VERSION ) );
+			error_log( sprintf( $message, self::NAME, self::VERSION ) );
 			flush_rewrite_rules();
 		}
 	}
@@ -364,8 +364,8 @@ class Main {
 	 */
 	public static function plugin_path( $path = '' ) {
 		$path = ltrim( trim( $path ), '/' );
-		$full = plugin_dir_path( static::FILE ) . $path;
-		return apply_filters( static::FILTER_PLUGIN_PATH, $full, $path );
+		$full = plugin_dir_path( self::FILE ) . $path;
+		return apply_filters( self::FILTER_PLUGIN_PATH, $full, $path );
 	}
 
 	/**
@@ -377,8 +377,8 @@ class Main {
 	 */
 	public static function plugin_url( $path = '' ) {
 		$path = ltrim( trim( $path ), '/' );
-		$url  = plugins_url( $path, static::FILE );
-		return apply_filters( static::FILTER_PLUGIN_URL, $url, $path );
+		$url  = plugins_url( $path, self::FILE );
+		return apply_filters( self::FILTER_PLUGIN_URL, $url, $path );
 	}
 
 	/* -------------------------------------------------------------------------
