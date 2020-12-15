@@ -65,14 +65,14 @@ class Asset {
 	public function init() {
 
 		//	Inline styles
-		if ( get_option( static::OPTION_ASSET_STYLE_INLINE ) ) {
-			add_filter( static::FILTER_ENQUEUE_STYLE, array( $this, 'inline_styles' ), 10, 5 );
+		if ( get_option( self::OPTION_ASSET_STYLE_INLINE ) ) {
+			add_filter( self::FILTER_ENQUEUE_STYLE, array( $this, 'inline_styles' ), 10, 5 );
 			add_action( 'wp_print_styles', array( $this, 'wp_print_styles' ), 50 );
 		}
 
 		//	Defer or async scripts
-		if ( get_option( static::OPTION_ASSET_SCRIPT_DEFER ) ) {
-			add_filter( static::FILTER_ENQUEUE_SCRIPT, array( $this, 'defer_scripts' ), 10, 5 );
+		if ( get_option( self::OPTION_ASSET_SCRIPT_DEFER ) ) {
+			add_filter( self::FILTER_ENQUEUE_SCRIPT, array( $this, 'defer_scripts' ), 10, 5 );
 			add_filter( 'script_loader_tag', array( $this, 'script_loader_tag' ), 5, 3 );
 		}
 	}
@@ -174,14 +174,14 @@ class Asset {
 	 */
 	public function enqueue_style( $path, $deps = array(), $args = array() ) {
 		$path   = trim( trim( $path ), '/' );
-		$base   = trim( static::DIR_STYLES, '/' );
+		$base   = trim( self::DIR_STYLES, '/' );
 		$debug  = SCRIPT_DEBUG || in_array( 'administrator', wp_get_current_user()->roles );
 		$source = $debug ? preg_replace( '/[.]min[.](js|css)$/', '.$1', $path ) : $path;
 		$handle = preg_replace( "!^{$base}/(.+?)([.]min)?[.](js|css)$!", '$1', $source );
 		$handle = preg_replace( '![/._]!', '-', Main::PREFIX . '-' . $handle );
 
 		wp_enqueue_style( $handle, Main::plugin_url( $source ), $deps, Main::VERSION, $args['media'] ?? 'all' );
-		return apply_filters( static::FILTER_ENQUEUE_STYLE, $handle, Main::plugin_path( $path ), $source, $deps, $args );
+		return apply_filters( self::FILTER_ENQUEUE_STYLE, $handle, Main::plugin_path( $path ), $source, $deps, $args );
 	}
 
 	/**
@@ -195,14 +195,14 @@ class Asset {
 	 */
 	public function enqueue_script( $path, $deps = array(), $args = array() ) {
 		$path   = trim( trim( $path ), '/' );
-		$base   = trim( static::DIR_SCRIPTS, '/' );
+		$base   = trim( self::DIR_SCRIPTS, '/' );
 		$debug  = SCRIPT_DEBUG || in_array( 'administrator', wp_get_current_user()->roles );
 		$source = $debug ? preg_replace( '/[.]min[.](js|css)$/', '.$1', $path ) : $path;
 		$handle = preg_replace( "!^{$base}/(.+?)([.]min)?[.](js|css)$!", '$1', $source );
 		$handle = preg_replace( '![/._]!', '-', Main::PREFIX . '-' . $handle );
 
 		wp_enqueue_script( $handle, Main::plugin_url( $source ), $deps, Main::VERSION, $args['footer'] ?? true );
-		return apply_filters( static::FILTER_ENQUEUE_SCRIPT, $handle, Main::plugin_path( $path ), $source, $deps, $args );
+		return apply_filters( self::FILTER_ENQUEUE_SCRIPT, $handle, Main::plugin_path( $path ), $source, $deps, $args );
 	}
 
 	/* -------------------------------------------------------------------------
@@ -218,7 +218,7 @@ class Asset {
 
 		// Assets section
 		Admin::instance()->add_section( array(
-			'section'     => static::SECTION_ASSET,
+			'section'     => self::SECTION_ASSET,
 			'page'        => Admin::PAGE,
 			'label'       => __( 'Asset settings', '[plugin-text-domain]' ),
 			'description' => vsprintf( '<p>%s</p>', array(
@@ -228,8 +228,8 @@ class Asset {
 
 		//	Inline stylesheets
 		Admin::instance()->add_checkbox( array(
-			'option'      => static::OPTION_ASSET_STYLE_INLINE,
-			'section'     => static::SECTION_ASSET,
+			'option'      => self::OPTION_ASSET_STYLE_INLINE,
+			'section'     => self::SECTION_ASSET,
 			'page'        => Admin::PAGE,
 			'label'       => __( 'Inline stylesheets', '[plugin-text-domain]' ),
 			'description' => __( 'Check to enable stylesheet inlining.', '[plugin-text-domain]' ),
@@ -237,8 +237,8 @@ class Asset {
 
 		//	Defer JavaScript
 		Admin::instance()->add_checkbox( array(
-			'option'      => static::OPTION_ASSET_SCRIPT_DEFER,
-			'section'     => static::SECTION_ASSET,
+			'option'      => self::OPTION_ASSET_SCRIPT_DEFER,
+			'section'     => self::SECTION_ASSET,
 			'page'        => Admin::PAGE,
 			'label'       => __( 'Defer JavaScript', '[plugin-text-domain]' ),
 			'description' => __( 'Check to enable deferred or async JavasScript.', '[plugin-text-domain]' ),
@@ -252,11 +252,11 @@ class Asset {
 	 */
 	public function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
-			if ( is_null( get_option( static::OPTION_ASSET_STYLE_INLINE, null ) ) ) {
-				add_option( static::OPTION_ASSET_STYLE_INLINE, 1 );
+			if ( is_null( get_option( self::OPTION_ASSET_STYLE_INLINE, null ) ) ) {
+				add_option( self::OPTION_ASSET_STYLE_INLINE, 1 );
 			}
-			if ( is_null( get_option( static::OPTION_ASSET_SCRIPT_DEFER, null ) ) ) {
-				add_option( static::OPTION_ASSET_SCRIPT_DEFER, 1 );
+			if ( is_null( get_option( self::OPTION_ASSET_SCRIPT_DEFER, null ) ) ) {
+				add_option( self::OPTION_ASSET_SCRIPT_DEFER, 1 );
 			}
 		}
 	}
@@ -269,8 +269,8 @@ class Asset {
 	public function delete() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
 			if ( get_option( Admin::OPTION_DELETE_SETTINGS ) ) {
-				delete_option( static::OPTION_ASSET_STYLE_INLINE );
-				delete_option( static::OPTION_ASSET_SCRIPT_DEFER );
+				delete_option( self::OPTION_ASSET_STYLE_INLINE );
+				delete_option( self::OPTION_ASSET_SCRIPT_DEFER );
 			}
 		}
 	}

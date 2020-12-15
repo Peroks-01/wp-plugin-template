@@ -58,8 +58,8 @@ class Admin {
 		$page  = add_menu_page(
 			$title,									//	Page title
 			Main::NAME,								//	Menu title
-			static::CAPABILITY,						//	Required capability
-			static::PAGE,							//	Menu page slug
+			self::CAPABILITY,						//	Required capability
+			self::PAGE,							//	Menu page slug
 			array( $this, 'admin_page_content' ),	//	Output function
 			'dashicons-smiley'						//	Icon name or url
 		);
@@ -78,8 +78,8 @@ class Admin {
 			'options-general.php',					//	Parent page slug
 			$title,									//	Page title
 			Main::NAME,								//	Menu title
-			static::CAPABILITY,						//	Required capability
-			static::PAGE,							//	Menu page slug
+			self::CAPABILITY,						//	Required capability
+			self::PAGE,							//	Menu page slug
 			array( $this, 'admin_page_content' )	//	Output function
 		);
 
@@ -113,7 +113,7 @@ class Admin {
 	 */
 	public function plugin_action_links( $actions ) {
 		array_unshift( $actions, vsprintf( '<a href="%s">%s</a>', array(
-			esc_url( menu_page_url( static::PAGE, false ) ),
+			esc_url( menu_page_url( self::PAGE, false ) ),
 			esc_html__( 'Settings', '[plugin-text-domain]' ),
 		) ) );
 		return $actions;
@@ -133,13 +133,13 @@ class Admin {
 	 * @since 1.0.0
 	 */
 	public function admin_page_content() {
-		if ( current_user_can( static::CAPABILITY ) ) {
+		if ( current_user_can( self::CAPABILITY ) ) {
 			printf( '<div class="wrap">' );
 			printf( '<h1>%s</h1>', get_admin_page_title() );
 			printf( '<form method="post" action="options.php">' );
 
 			settings_fields( Main::PREFIX );		//	Group name
-			do_settings_sections( static::PAGE );	//	Menu page slug
+			do_settings_sections( self::PAGE );	//	Menu page slug
 			submit_button();
 
 			printf( '</form>' );
@@ -160,8 +160,8 @@ class Admin {
 
 		// Assets section
 		$this->add_section( array(
-			'section'     => static::SECTION_DELETE,
-			'page'        => static::PAGE,
+			'section'     => self::SECTION_DELETE,
+			'page'        => self::PAGE,
 			'label'       => __( 'DANGER ZONE!', '[plugin-text-domain]' ),
 			'description' => vsprintf( '<p>%s %s</p>', array(
 				esc_html__( 'Check the below checkbox to also delete all plugin data and settings when this plugin is deleted.', '[plugin-text-domain]' ),
@@ -171,9 +171,9 @@ class Admin {
 
 		//	Inline stylesheets
 		$this->add_checkbox( array(
-			'option'      => static::OPTION_DELETE_SETTINGS,
-			'section'     => static::SECTION_DELETE,
-			'page'        => static::PAGE,
+			'option'      => self::OPTION_DELETE_SETTINGS,
+			'section'     => self::SECTION_DELETE,
+			'page'        => self::PAGE,
 			'label'       => __( 'Also delete plugin data', '[plugin-text-domain]' ),
 			'description' => __( 'Check to also delete all plugin data and settings when deleting this plugin.', '[plugin-text-domain]' ),
 		) );
@@ -186,8 +186,8 @@ class Admin {
 	 */
 	public function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
-			if ( is_null( get_option( static::OPTION_DELETE_SETTINGS, null ) ) ) {
-				add_option( static::OPTION_DELETE_SETTINGS, 0 );
+			if ( is_null( get_option( self::OPTION_DELETE_SETTINGS, null ) ) ) {
+				add_option( self::OPTION_DELETE_SETTINGS, 0 );
 			}
 		}
 	}
@@ -199,8 +199,8 @@ class Admin {
 	 */
 	public function delete() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
-			if ( get_option( static::OPTION_DELETE_SETTINGS ) ) {
-				delete_option( static::OPTION_DELETE_SETTINGS );
+			if ( get_option( self::OPTION_DELETE_SETTINGS ) ) {
+				delete_option( self::OPTION_DELETE_SETTINGS );
 			}
 		}
 	}
