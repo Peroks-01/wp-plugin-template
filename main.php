@@ -73,6 +73,7 @@ class Main {
 	 */
 	const REQUIRE_PHP  = '7.0';	//	Required PHP version
 	const REQUIRE_WP   = '5.0';	//	Required WordPress version
+	const REQUIRE_ACF  = '0';	//	Required Advanced Custom Fields version
 	const REQUIRE_WOO  = '0';	//	Required WooCommerce version
 	const REQUIRE_LMS  = '0';	//	Required LearnDash LMS version
 	const REQUIRE_WPML = '0';	//	Required WordPress Multilingual version
@@ -167,6 +168,16 @@ class Main {
 		}
 	}
 
+	/* =========================================================================
+	 * Everything below this line is just plugin management and some very
+	 * basic path and url handlers. You'll find the real action in the classes
+	 * loaded above.
+	 * ====================================================================== */
+
+	/* -------------------------------------------------------------------------
+	 * System environment checks
+	 * ---------------------------------------------------------------------- */
+
 	/**
 	 * Checks if the system environment is supported.
 	 *
@@ -186,6 +197,12 @@ class Main {
 
 		if ( defined( 'self::REQUIRE_WP' ) && self::REQUIRE_WP ) {
 			if ( version_compare( get_bloginfo( 'version' ), self::REQUIRE_WP ) < 0 ) {
+				$error = static::error( 'WordPress', self::REQUIRE_WP ) || $error;
+			}
+		}
+
+		if ( defined( 'self::REQUIRE_ACF' ) && self::REQUIRE_ACF ) {
+			if ( version_compare( get_option( 'acf_version', 0 ), self::REQUIRE_ACF ) < 0 ) {
 				$error = static::error( 'WordPress', self::REQUIRE_WP ) || $error;
 			}
 		}
@@ -212,16 +229,6 @@ class Main {
 
 		return empty( $error );
 	}
-
-	/* =========================================================================
-	 * Everything below this line is just plugin management and some very
-	 * basic path and url handlers. You'll find the real action in the classes
-	 * loaded above.
-	 * ====================================================================== */
-
-	/* -------------------------------------------------------------------------
-	 * Error handling
-	 * ---------------------------------------------------------------------- */
 
 	/**
 	 * Logs and outputs missing system requirements.
