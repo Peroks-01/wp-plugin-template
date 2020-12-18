@@ -93,6 +93,7 @@ class Main {
 	const FILTER_CLASS_CREATED = self::PREFIX . '_class_created';
 	const FILTER_CLASS_PATH    = self::PREFIX . '_class_path';
 	const FILTER_SYSTEM_CHECK  = self::PREFIX . '_system_check';
+	const FILTER_PLUGIN_PREFIX = self::PREFIX . '_plugin_prefix';
 	const FILTER_PLUGIN_PATH   = self::PREFIX . '_plugin_path';
 	const FILTER_PLUGIN_URL    = self::PREFIX . '_plugin_url';
 
@@ -352,8 +353,21 @@ class Main {
 	}
 
 	/* -------------------------------------------------------------------------
-	 * Basic path and url handlers.
+	 * Basic prefix, path and url utils
 	 * ---------------------------------------------------------------------- */
+
+	/**
+	 * Gets a prefixed identifier.
+	 *
+	 * @since 1.0.0
+	 * @param string $name The identifier to prefix.
+	 * @param string $sep The prefix separator.
+	 * @return string The prefixed identifier.
+	 */
+	public function plugin_prefix( $name = '', $sep = '_' ) {
+		$result = str_replace( '_', $sep, self::PREFIX . $sep . $name );
+		return apply_filters( self::FILTER_PLUGIN_PREFIX, $result, $name, $sep );
+	}
 
 	/**
 	 * Gets a full filesystem path from a local path.
