@@ -59,7 +59,7 @@ class Admin {
 			$title,									//	Page title
 			Main::NAME,								//	Menu title
 			self::CAPABILITY,						//	Required capability
-			self::PAGE,							//	Menu page slug
+			self::PAGE,								//	Menu page slug
 			array( $this, 'admin_page_content' ),	//	Output function
 			'dashicons-smiley'						//	Icon name or url
 		);
@@ -79,7 +79,7 @@ class Admin {
 			$title,									//	Page title
 			Main::NAME,								//	Menu title
 			self::CAPABILITY,						//	Required capability
-			self::PAGE,							//	Menu page slug
+			self::PAGE,								//	Menu page slug
 			array( $this, 'admin_page_content' )	//	Output function
 		);
 
@@ -158,7 +158,7 @@ class Admin {
 	 */
 	public function admin_init() {
 
-		// Assets section
+		//	Danger section
 		$this->add_section( array(
 			'section'     => self::SECTION_DELETE,
 			'page'        => self::PAGE,
@@ -169,7 +169,7 @@ class Admin {
 			) ),
 		) );
 
-		//	Inline stylesheets
+		//	Delete plugin data
 		$this->add_checkbox( array(
 			'option'      => self::OPTION_DELETE_SETTINGS,
 			'section'     => self::SECTION_DELETE,

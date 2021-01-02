@@ -19,6 +19,8 @@ class Asset {
 	/**
 	 * @var string The class filter hooks.
 	 */
+	const FILTER_GET_BASE       = Main::PREFIX . '_get_base';
+	const FILTER_GET_HANDLE     = Main::PREFIX . '_get_handle';
 	const FILTER_ENQUEUE_STYLE  = Main::PREFIX . '_enqueue_style';
 	const FILTER_ENQUEUE_SCRIPT = Main::PREFIX . '_enqueue_script';
 
@@ -164,6 +166,42 @@ class Asset {
 	 * ---------------------------------------------------------------------- */
 
 	/**
+	 * Gets the base directory for the give asset.
+	 *
+	 * @since 1.0.0
+	 * @param string $path The local path to the asset relative to this plugin's root directory.
+	 * @return bool|string The asset base directory.
+	 */
+	public function get_base( $path ) {
+		switch ( pathinfo( $path, PATHINFO_EXTENSION ) ) {
+			case 'css': $base = self::DIR_STYLES; break;
+			case 'js': $base  = self::DIR_SCRIPTS; break;
+			default: $base    = '';
+		}
+
+		$base = trim( $base, '/' );
+		return apply_filters( self::FILTER_GET_BASE, $base, $path );
+	}
+
+	/**
+	 * Enqueues a script.
+	 *
+	 * @since 1.0.0
+	 * @param string $path The local path to the asset relative to this plugin's root directory.
+	 * @return bool|string The generated asset handle.
+	 */
+	public function get_handle( $path ) {
+		$path   = trim( trim( $path ), '/' );
+		$base   = $this->get_base( $path );
+		$debug  = SCRIPT_DEBUG || current_user_can( 'administrator' );
+		$source = $debug ? preg_replace( '/[.]min[.](js|css)$/', '.$1', $path ) : $path;
+		$handle = preg_replace( "!^{$base}/(.+?)([.]min)?[.](js|css)$!", '$1', $source );
+		$handle = preg_replace( '![/._]!', '-', Main::PREFIX . '-' . $handle );
+
+		return apply_filters( self::FILTER_GET_HANDLE, $handle, Main::plugin_path( $source ), $source, $base );
+	}
+
+	/**
 	 * Enqueues a stylesheet.
 	 *
 	 * @since 1.0.0
@@ -174,14 +212,14 @@ class Asset {
 	 */
 	public function enqueue_style( $path, $deps = array(), $args = array() ) {
 		$path   = trim( trim( $path ), '/' );
-		$base   = trim( self::DIR_STYLES, '/' );
-		$debug  = SCRIPT_DEBUG || in_array( 'administrator', wp_get_current_user()->roles );
+		$base   = $this->get_base( $path );
+		$debug  = SCRIPT_DEBUG || current_user_can( 'administrator' );
 		$source = $debug ? preg_replace( '/[.]min[.](js|css)$/', '.$1', $path ) : $path;
 		$handle = preg_replace( "!^{$base}/(.+?)([.]min)?[.](js|css)$!", '$1', $source );
 		$handle = preg_replace( '![/._]!', '-', Main::PREFIX . '-' . $handle );
 
 		wp_enqueue_style( $handle, Main::plugin_url( $source ), $deps, Main::VERSION, $args['media'] ?? 'all' );
-		return apply_filters( self::FILTER_ENQUEUE_STYLE, $handle, Main::plugin_path( $path ), $source, $deps, $args );
+		return apply_filters( self::FILTER_ENQUEUE_STYLE, $handle, Main::plugin_path( $source ), $source, $deps, $args );
 	}
 
 	/**
@@ -195,14 +233,14 @@ class Asset {
 	 */
 	public function enqueue_script( $path, $deps = array(), $args = array() ) {
 		$path   = trim( trim( $path ), '/' );
-		$base   = trim( self::DIR_SCRIPTS, '/' );
-		$debug  = SCRIPT_DEBUG || in_array( 'administrator', wp_get_current_user()->roles );
+		$base   = $this->get_base( $path );
+		$debug  = SCRIPT_DEBUG || current_user_can( 'administrator' );
 		$source = $debug ? preg_replace( '/[.]min[.](js|css)$/', '.$1', $path ) : $path;
 		$handle = preg_replace( "!^{$base}/(.+?)([.]min)?[.](js|css)$!", '$1', $source );
 		$handle = preg_replace( '![/._]!', '-', Main::PREFIX . '-' . $handle );
 
 		wp_enqueue_script( $handle, Main::plugin_url( $source ), $deps, Main::VERSION, $args['footer'] ?? true );
-		return apply_filters( self::FILTER_ENQUEUE_SCRIPT, $handle, Main::plugin_path( $path ), $source, $deps, $args );
+		return apply_filters( self::FILTER_ENQUEUE_SCRIPT, $handle, Main::plugin_path( $source ), $source, $deps, $args );
 	}
 
 	/* -------------------------------------------------------------------------
