@@ -27,8 +27,6 @@ class Setup {
 
 	/**
 	 * Loads the translated strings (if any).
-	 *
-	 * @since 1.0.0
 	 */
 	public function init() {
 		$base = dirname( plugin_basename( Main::FILE ) ) . '/languages';
@@ -37,16 +35,12 @@ class Setup {
 
 	/**
 	 * Register widgets.
-	 *
-	 * @since 1.0.0
 	 */
 	public function widgets_init() {
 	}
 
 	/**
 	 * Enqueues styles.
-	 *
-	 * @since 1.0.0
 	 */
 	public function wp_enqueue_styles() {
 		$args = array( 'inline' => true );
@@ -55,8 +49,6 @@ class Setup {
 
 	/**
 	 * Enqueues scripts.
-	 *
-	 * @since 1.0.0
 	 */
 	public function wp_enqueue_scripts() {
 		$args = array( 'async' => true );

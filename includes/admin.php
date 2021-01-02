@@ -50,8 +50,6 @@ class Admin {
 
 	/**
 	 * Adds a top level page to the admin menu.
-	 *
-	 * @since 1.0.0
 	 */
 	public function admin_top_menu() {
 		$title = __( '[This Plugin Name] settings', '[plugin-text-domain]' );
@@ -69,8 +67,6 @@ class Admin {
 
 	/**
 	 * Adds a submenu page to the admin menu.
-	 *
-	 * @since 1.0.0
 	 */
 	public function admin_sub_menu() {
 		$title = __( '[This Plugin Name] settings', '[plugin-text-domain]' );
@@ -89,7 +85,6 @@ class Admin {
 	/**
 	 * Displays a "Support" link for this plugin on the Plugins page.
 	 *
-	 * @since 1.0.0
 	 * @param array $links An array of the plugin's metadata.
 	 * @param string $file Path to the plugin file relative to the plugins directory.
 	 * @return array Modified metadata array.
@@ -107,7 +102,6 @@ class Admin {
 	/**
 	 * Displays a "Settings" link for this plugin on the Plugins page.
 	 *
-	 * @since 1.0.0
 	 * @param array $actions An array of plugin action links.
 	 * @return array Tme modified action links.
 	 */
@@ -121,16 +115,12 @@ class Admin {
 
 	/**
 	 * Callback for loading assets for the admin page.
-	 *
-	 * @since 1.0.0
 	 */
 	public function admin_page_load() {
 	}
 
 	/**
 	 * Displays the admin page content.
-	 *
-	 * @since 1.0.0
 	 */
 	public function admin_page_content() {
 		if ( current_user_can( self::CAPABILITY ) ) {
@@ -153,8 +143,6 @@ class Admin {
 
 	/**
 	 * Registers settings, sections and fields.
-	 *
-	 * @since 1.0.0
 	 */
 	public function admin_init() {
 
@@ -181,8 +169,6 @@ class Admin {
 
 	/**
 	 * Sets plugin default setting on activation.
-	 *
-	 * @since 1.0.0
 	 */
 	public function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
@@ -194,8 +180,6 @@ class Admin {
 
 	/**
 	 * Removes settings on plugin deletion.
-	 *
-	 * @since 1.0.0
 	 */
 	public function delete() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
@@ -213,8 +197,6 @@ class Admin {
 	 * Adds a new sections to an admin page.
 	 *
 	 * Wrapper for add_settings_section.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param array $args An array of arguments with the below key/value pairs:
 	 * @var string section The section id (slug)
@@ -239,8 +221,6 @@ class Admin {
 	 * Adds a checkbox to a section on an admin page.
 	 *
 	 * Wrapper for register_setting and add_settings_field.
-	 *
-	 * @since 1.0.0
 	 *
 	 * @param array $args An array of arguments with the below key/value pairs:
 	 * @var string option The field id (slug)

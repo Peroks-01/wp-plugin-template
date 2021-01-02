@@ -133,7 +133,6 @@ class Main {
 	/**
 	 * Registers autoloading.
 	 *
-	 * @since 1.0.0
 	 * @todo Add your own plugin classes and their file system paths here.
 	 */
 	protected function autoload() {
@@ -156,7 +155,6 @@ class Main {
 	 *
 	 * You must register your classes for autoloading (above) before you can run them here.
 	 *
-	 * @since 1.0.0
 	 * @todo Add your own plugin classes.
 	 */
 	protected function run() {
@@ -181,9 +179,7 @@ class Main {
 	/**
 	 * Checks if the system environment is supported.
 	 *
-	 * @since 1.0.0
 	 * @todo Add/remove system environment checks for your plugin.
-	 *
 	 * @return bool True if the system environment is supported, false otherwise.
 	 */
 	protected static function check() {
@@ -233,7 +229,6 @@ class Main {
 	/**
 	 * Logs and outputs missing system requirements.
 	 *
-	 * @since 1.0.0
 	 * @param string $require The name of the required component.
 	 * @param string $version The minimum version required.
 	 * @return bool True, except when overridden by filter.
@@ -272,7 +267,6 @@ class Main {
 	 *
 	 * Notifies plugin classes to update and flushes rewrite rules.
 	 *
-	 * @since 1.0.0
 	 * @return bool True if the plugin was updated, false otherwise.
 	 */
 	protected function update() {
@@ -297,7 +291,6 @@ class Main {
 	/**
 	 * Registers plugin activation, deactivation and uninstall hooks.
 	 *
-	 * @since 1.0.0
 	 */
 	public static function register() {
 		if ( is_admin() ) {
@@ -314,7 +307,6 @@ class Main {
 	 * This hook is called AFTER all other hooks (except 'shutdown').
 	 * WP redirects the request immediately after this hook, so we can't register any hooks to be executed later.
 	 *
-	 * @since 1.0.0
 	 */
 	public static function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
@@ -330,8 +322,6 @@ class Main {
 	 * Runs when the plugin is deactivated.
 	 *
 	 * Notifies plugin classes to deactivate and flushes rewrite rules.
-	 *
-	 * @since 1.0.0
 	 */
 	public static function deactivate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
@@ -346,8 +336,6 @@ class Main {
 	 * Runs when the plugin is deleted.
 	 *
 	 * Notifies plugin classes to delete all plugin settings and flushes rewrite rules.
-	 *
-	 * @since 1.0.0
 	 */
 	public static function uninstall() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
@@ -366,7 +354,6 @@ class Main {
 	/**
 	 * Gets a prefixed identifier.
 	 *
-	 * @since 1.0.0
 	 * @param string $name The identifier to prefix.
 	 * @param string $sep The prefix separator.
 	 * @return string The prefixed identifier.
@@ -379,7 +366,6 @@ class Main {
 	/**
 	 * Gets a full filesystem path from a local path.
 	 *
-	 * @since 1.0.0
 	 * @param string $path The local path relative to this plugin's root directory.
 	 * @return string The full filesystem path.
 	 */
@@ -392,7 +378,6 @@ class Main {
 	/**
 	 * Gets the URL to the given local path.
 	 *
-	 * @since 1.0.0
 	 * @param string $path The local path relative to this plugin's root directory.
 	 * @return string The URL.
 	 */
@@ -409,7 +394,6 @@ class Main {
 	/**
 	 * Writes an entry to the php log and adds context information.
 	 *
-	 * @since 1.0.0
 	 * @param string $log Log entry.
 	 */
 	public static function log( $log = '' ) {
@@ -423,8 +407,6 @@ class Main {
 
 	/**
 	 * Writes the backtrace to the php log.
-	 *
-	 * @since 1.0.0
 	 */
 	public static function trace() {
 		static::log( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS ) );

@@ -61,8 +61,6 @@ class Asset {
 
 	/**
 	 * Inline style and defer scripts.
-	 *
-	 * @since 1.0.0
 	 */
 	public function init() {
 
@@ -86,7 +84,6 @@ class Asset {
 	/**
 	 * Registers styles for inlining.
 	 *
-	 * @since 1.0.0
 	 * @see Main::enqueue_style()
 	 *
 	 * @param string $handle A stylesheet handle.
@@ -124,7 +121,6 @@ class Asset {
 	/**
 	 * Registers styles for defer or async.
 	 *
-	 * @since 1.0.0
 	 * @see Main::enqueue_script()
 	 *
 	 * @param string $handle A JavaScript handle.
@@ -168,7 +164,6 @@ class Asset {
 	/**
 	 * Gets the base directory for the give asset.
 	 *
-	 * @since 1.0.0
 	 * @param string $path The local path to the asset relative to this plugin's root directory.
 	 * @return bool|string The asset base directory.
 	 */
@@ -186,7 +181,6 @@ class Asset {
 	/**
 	 * Enqueues a script.
 	 *
-	 * @since 1.0.0
 	 * @param string $path The local path to the asset relative to this plugin's root directory.
 	 * @return bool|string The generated asset handle.
 	 */
@@ -204,7 +198,6 @@ class Asset {
 	/**
 	 * Enqueues a stylesheet.
 	 *
-	 * @since 1.0.0
 	 * @param string $path The local path to the asset relative to this plugin's root directory.
 	 * @param array $deps An array of registered stylesheet handles this stylesheet depends on.
 	 * @param array $args Optional additional arguments: media, inline, etc.
@@ -225,7 +218,6 @@ class Asset {
 	/**
 	 * Enqueues a script.
 	 *
-	 * @since 1.0.0
 	 * @param string $path The local path to the asset relative to this plugin's root directory.
 	 * @param array $deps An array of registered script handles this script depends on.
 	 * @param array $args Optional additional arguments: footer, defer, async, etc.
@@ -249,8 +241,6 @@ class Asset {
 
 	/**
 	 * Registers settings, sections and fields.
-	 *
-	 * @since 1.0.0
 	 */
 	public function admin_init() {
 
@@ -285,8 +275,6 @@ class Asset {
 
 	/**
 	 * Sets plugin default settings on activation.
-	 *
-	 * @since 1.0.0
 	 */
 	public function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
@@ -301,8 +289,6 @@ class Asset {
 
 	/**
 	 * Removes settings on plugin deletion.
-	 *
-	 * @since 1.0.0
 	 */
 	public function delete() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
