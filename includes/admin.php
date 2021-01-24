@@ -39,7 +39,7 @@ class Admin {
 		add_filter( "plugin_action_links_{$name}", array( $this, 'plugin_action_links' ) );
 
 		//	Admin settings
-		add_action( 'admin_init', array( $this, 'admin_init' ) );
+		add_action( 'admin_init', array( $this, 'admin_init' ), 25 );
 		add_action( Main::ACTION_ACTIVATE, array( $this, 'activate' ) );
 		add_action( Main::ACTION_DELETE, array( $this, 'delete' ), 100 );
 	}
@@ -256,5 +256,69 @@ class Admin {
 			) );
 			printf( '<span>%s</span>', wp_kses_post( $param->description ) );
 		}, $param->page, $param->section, array( 'label_for' => esc_attr( $param->option ) ) );
+	}
+
+	/**
+	 * Adds a numeric input field to a section on an admin page.
+	 *
+	 * Wrapper for register_setting and add_settings_field.
+	 *
+	 * @param array $args An array of arguments with the below key/value pairs:
+	 * @var string option The field id (slug)
+	 * @var string section The section id (slug)
+	 * @var string page The menu slug of the page to display the field
+	 * @var string group The option group id
+	 * @var string label The field label
+	 * @var string description The field description
+	 */
+	public function add_number( $args ) {
+		$param = (object) wp_parse_args( $args, array(
+			'option'      => '',
+			'section'     => '',
+			'page'        => '',
+			'group'       => Main::PREFIX,
+			'label'       => '',
+			'description' => '',
+		) );
+
+		register_setting( $param->group, $param->option, array(
+			'type'              => 'integer',
+			'default'           => 0,
+			'sanitize_callback' => function ( $value ) {
+				return (int) $value;
+			},
+		) );
+
+		add_settings_field( $param->option, $param->label, function () use ( $param ) {
+			$whitelist = array_flip( array(	'max', 'min', 'step', 'readonly' ) );
+			$attributes = array_intersect_key( (array) $param, $whitelist );
+
+			vprintf( '<input type="number" id="%s" class="small-text" name="%s" value="%d"%s>', array(
+				esc_attr( $param->option ),
+				esc_attr( $param->option ),
+				get_option( $param->option ),
+				$this->array_to_attr( $attributes ),
+			) );
+			printf( ' <span>%s</span>', wp_kses_post( $param->description ) );
+		}, $param->page, $param->section, array( 'label_for' => esc_attr( $param->option ) ) );
+	}
+
+	/**
+	 * Transforms an associative array of key/value pairs to html attributes.
+	 *
+	 * @param array $attr HTML attributes as key/value pairs.
+	 * @return string Html attributes
+	 */
+	protected function array_to_attr( $attr = array() ) {
+		$call = function ( $key, $value ) {
+			if ( $value && is_bool( $value ) ) {
+				return sanitize_key( $key ) . '="' . esc_attr( $key ) . '"';
+			}
+			return sanitize_key( $key ) . '="' . esc_attr( $value ) . '"';
+		};
+
+		if ( $attr ) {
+			return ' ' . join( ' ', array_map( $call, array_keys( $attr ), $attr ) );
+		}
 	}
 }

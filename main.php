@@ -141,6 +141,9 @@ class Main {
 			__NAMESPACE__ . '\Setup'     => static::plugin_path( 'includes/setup.php' ),
 			__NAMESPACE__ . '\Asset'     => static::plugin_path( 'includes/asset.php' ),
 			__NAMESPACE__ . '\Admin'     => static::plugin_path( 'includes/admin.php' ),
+			__NAMESPACE__ . '\Modal'     => static::plugin_path( 'includes/modal.php' ),
+			__NAMESPACE__ . '\Utils'     => static::plugin_path( 'includes/utils.php' ),
+			__NAMESPACE__ . '\Download'  => static::plugin_path( 'includes/download.php' ),
 		) );
 
 		spl_autoload_register( function ( $name ) use ( $classes ) {
@@ -160,6 +163,7 @@ class Main {
 	protected function run() {
 		Setup::instance();
 		Asset::instance();
+		Modal::instance();
 
 		if ( is_admin() ) {
 			Admin::instance();
@@ -290,7 +294,6 @@ class Main {
 
 	/**
 	 * Registers plugin activation, deactivation and uninstall hooks.
-	 *
 	 */
 	public static function register() {
 		if ( is_admin() ) {
@@ -306,7 +309,6 @@ class Main {
 	 * Notifies plugin classes to activate and flushes rewrite rules.
 	 * This hook is called AFTER all other hooks (except 'shutdown').
 	 * WP redirects the request immediately after this hook, so we can't register any hooks to be executed later.
-	 *
 	 */
 	public static function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {

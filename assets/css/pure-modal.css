@@ -1,0 +1,49 @@
+/**
+ * Required css
+ */
+
+.pure-modal-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    outline: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pure-modal-dialog {
+    display: none;
+    position: relative;
+    margin: 0 auto;
+}
+
+.pure-modal-overlay .pure-modal-dialog {
+    display: block;
+}
+
+/**
+ * Default css
+ */
+
+.pure-modal-overlay {
+    transition: all .25s ease-out;
+}
+
+.pure-modal-overlay.open {
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: all .25s ease-out;
+}
+
+.pure-modal-dialog {
+    max-width: 60vw;
+    transition: all .25s ease-out;
+    opacity: 0;
+    background-color: white;
+}
+
+.pure-modal-overlay.open .pure-modal-dialog {
+    opacity: 1;
+}
