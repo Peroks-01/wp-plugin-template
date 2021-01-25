@@ -12,7 +12,8 @@ class Utils {
 	/**
 	 * @var string The class filter hooks.
 	 */
-	const FILTER_GET_WIDGET = Main::PREFIX . '_get_widget';
+	const FILTER_PARSE_CLASS = Main::PREFIX . '_parse_class';
+	const FILTER_GET_WIDGET  = Main::PREFIX . '_get_widget';
 
 	/* -------------------------------------------------------------------------
 	 * Public methods
@@ -28,6 +29,17 @@ class Utils {
 		return array_filter( $array, function ( $value ) {
 			return isset( $value );
 		} );
+	}
+
+	/**
+	 * Transforms a css class string to an array.
+	 *
+	 * @param string $class A css class string
+	 * @return array An array of css classes.
+	 */
+	public function parse_class( $class ) {
+		$class = is_string( $class ) ? preg_split( '/[\s]+/', $class ) : (array) $class;
+		return apply_filters( self::FILTER_PARSE_CLASS, array_filter( $class ) );
 	}
 
 	/**
