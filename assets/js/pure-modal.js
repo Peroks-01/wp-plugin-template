@@ -1,7 +1,7 @@
 (function (pure) {
 	'use strict'
 
-	/* ===== Constructor ========================= */
+	/* ===== Constructor and initiation ========================= */
 
 	function Modal(container, options) {
 		this.options = options || {};
@@ -13,27 +13,34 @@
 
 	Modal.prototype.init = function () {
 		this.dispatch('pureModalInit', { modal: this });
-		const selector = '[data-modal-container=' + this.container.id + ']';
 
-		document.querySelectorAll(selector).forEach(function (trigger) {
-			trigger.addEventListener('click', this.open.bind(this));
+		document.querySelectorAll('.' + this.container.id).forEach(function (trigger) {
+			trigger.addEventListener('click', function (event) {
+				event.preventDefault();
+				event.stopPropagation();
+				this.open.call(this);
+			}.bind(this));
 		}, this);
 
 		this.container.querySelectorAll('data.pure-modal-load').forEach(function (data) {
 			this.load(data.value, function (status, response) {
 				let detail = { modal: this, data: data, status: status, response: response };
 				this.dispatch('pureModalLoaded', detail);
-				if (status == 200) data.outerHTML = detail.response;
+				if (detail.status == 200) data.outerHTML = detail.response;
 			});
 		}, this);
 
 		this.dispatch('pureModalReady', { modal: this });
 	}
 
+	/* ===== Open and close modal dialog ========================= */
+
 	Modal.prototype.open = function () {
 		if (this.container && !this.overlay) {
+			this.dispatch('pureModalOpen', { modal: this });
+
 			this.container.querySelectorAll('data.pure-modal-defer').forEach(function (data) {
-				data.parentNode.insertBefore(this.parse(atob(data.value)), data);
+				data.parentNode.insertBefore(Modal.parse(atob(data.value)), data);
 				data.parentNode.removeChild(data);
 			}, this);
 
@@ -53,7 +60,7 @@
 			}.bind(this));
 		}
 
-		this.dispatch('pureModalOpen', { modal: this });
+		this.dispatch('pureModalOpened', { modal: this });
 	}
 
 	Modal.prototype.build = function () {
@@ -74,15 +81,13 @@
 
 		this.setPosition();
 		this.removeScroll();
-
 		this.overlay.classList.add('open');
-		this.dispatch('pureModalBuild', { modal: this });
 	}
 
 	Modal.prototype.close = function () {
 		if (this.container && this.overlay) {
-			this.dialog.style.marginTop = 0;
 			this.overlay.classList.remove('open');
+			this.dialog.style.marginTop = 0;
 			this.dispatch('pureModalClose', { modal: this });
 
 			setTimeout(function () {
@@ -90,18 +95,12 @@
 				this.overlay.parentNode.removeChild(this.overlay);
 				this.overlay = this.dialog = null;
 				this.resetScroll();
+				this.dispatch('pureModalClosed', { modal: this });
 			}.bind(this), this.options.fadeout || 250);
 		}
 	}
 
 	/* ===== Utils ========================= */
-
-	Modal.prototype.dispatch = function (type, detail) {
-		this.container.dispatchEvent(new CustomEvent(type, {
-			bubbles: true,
-			detail: detail,
-		}));
-	}
 
 	Modal.prototype.setPosition = function () {
 		let diff = (this.overlay.clientHeight - this.dialog.scrollHeight) / 2;
@@ -121,33 +120,11 @@
 		document.documentElement.style.overflow = '';
 	}
 
-	Modal.prototype.parse = function (content) {
-		if (content && typeof (content) === 'string') {
-			var target = document.createDocumentFragment();
-			var source = document.createElement('div');
-			source.innerHTML = content;
-
-			while (source.children.length) {
-				if (source.children[0].tagName.toLowerCase() == 'script') {
-					target.appendChild(this.clone(source.children[0]));
-					source.removeChild(source.children[0]);
-				} else {
-					target.appendChild(source.children[0]);
-				}
-			}
-			return target;
-		}
-		return content || document.createDocumentFragment();
-	}
-
-	Modal.prototype.clone = function (source) {
-		var target = document.createElement(source.tagName.toLowerCase());
-		target.textContent = source.textContent;
-
-		for (var i = 0; i < source.attributes.length; i++) {
-			target.setAttribute(source.attributes[i].nodeName, source.attributes[i].nodeValue);
-		}
-		return target;
+	Modal.prototype.dispatch = function (type, detail) {
+		this.container.dispatchEvent(new CustomEvent(type, {
+			bubbles: true,
+			detail: detail,
+		}));
 	}
 
 	Modal.prototype.load = function (url, callback) {
@@ -158,6 +135,60 @@
 			callback.call(this, xhr.status, xhr.responseText);
 		}.bind(this);
 	}
+
+	/* ===== Static methods ========================= */
+
+	Object.defineProperty(Modal, 'parse', {
+		configurable: true,
+		value: function (content) {
+			if (content && typeof (content) === 'string') {
+				var target = document.createDocumentFragment();
+				var source = document.createElement('div');
+				source.innerHTML = content;
+
+				while (source.children.length) {
+					if (source.children[0].tagName.toLowerCase() == 'script') {
+						target.appendChild(Modal.clone(source.children[0]));
+						source.removeChild(source.children[0]);
+					} else {
+						target.appendChild(source.children[0]);
+					}
+				}
+				return target;
+			}
+			return content || document.createDocumentFragment();
+		}
+	});
+
+	Object.defineProperty(Modal, 'clone', {
+		configurable: true,
+		value: function (source) {
+			var target = document.createElement(source.tagName.toLowerCase());
+			target.textContent = source.textContent;
+
+			for (var i = 0, len = source.attributes.length; i < len; i++) {
+				target.setAttribute(source.attributes[i].nodeName, source.attributes[i].nodeValue);
+			}
+			return target;
+		}
+	});
+
+	Object.defineProperty(Modal, 'auto', {
+		configurable: true,
+		value: function () {
+			document.querySelectorAll('.pure-modal-container').forEach(function (container) {
+				let options = JSON.parse(container.dataset.pureModal || '{}');
+				new Modal(container, options);
+			});
+		}
+	});
+
+	Object.defineProperty(Modal, 'ready', {
+		configurable: true,
+		value: function (callback) {
+			document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', callback) : callback();
+		}
+	});
 
 	/* ===== Polyfills ========================= */
 
@@ -174,25 +205,9 @@
 		NodeList.prototype.forEach = Array.prototype.forEach;
 	}
 
-	/* ===== Static methods ========================= */
+	/* ===== Execute ========================= */
 
-	Object.defineProperty(Modal, 'auto', {
-		configurable: true,
-		value: function () {
-			document.querySelectorAll('.pure-modal-container').forEach(function (container) {
-				new Modal(container);
-			});
-		}
-	});
-
-	Object.defineProperty(Modal, 'ready', {
-		configurable: true,
-		value: function (callback) {
-			document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', callback) : callback();
-		},
-	});
-
-	Modal.ready(Modal.auto);
 	pure.Modal = Modal;
+	pure.Modal.ready(pure.Modal.auto);
 
 })(window.pure = window.pure || {});
