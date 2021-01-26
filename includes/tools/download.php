@@ -60,7 +60,7 @@ class Download {
 		if ( 'themes.php' == $page ) {
 			$deps = array( 'jquery' );
 			$args = array( 'defer' => true );
-			Asset::instance()->enqueue_script( 'assets/js/download.min.js', $deps, $args );
+			Asset::instance()->enqueue_script( 'assets/js/tools/download.min.js', $deps, $args );
 		}
 	}
 

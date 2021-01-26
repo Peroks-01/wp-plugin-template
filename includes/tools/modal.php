@@ -62,7 +62,7 @@ class Modal {
 	 */
 	public function wp_enqueue_styles() {
 		$args = array( 'inline' => true );
-		Asset::instance()->enqueue_style( 'assets/css/pure-modal.min.css', array(), $args );
+		Asset::instance()->enqueue_style( 'assets/css/tools/pure-modal.min.css', array(), $args );
 	}
 
 	/**
@@ -70,7 +70,7 @@ class Modal {
 	 */
 	public function wp_enqueue_scripts() {
 		$args = array( 'defer' => true );
-		Asset::instance()->enqueue_script( 'assets/js/pure-modal.min.js', array(), $args );
+		Asset::instance()->enqueue_script( 'assets/js/tools/pure-modal.min.js', array(), $args );
 	}
 
 	/* -------------------------------------------------------------------------

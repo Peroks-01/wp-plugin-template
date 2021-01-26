@@ -10,8 +10,8 @@
  * Author:            Per Egil Roksvaag
  * Author URI:        https://codeable.io/developers/per-egil-roksvaag/
  *
- * Version:           1.0.0
- * Stable tag:        1.0.0
+ * Version:           0.1.0
+ * Stable tag:        0.1.0
  * Requires at least: 5.0
  * Tested up to:      5.6
  * Requires PHP:      7.0
@@ -20,9 +20,8 @@
 /**
  * The [This Plugin Name] plugin main class.
  *
- * @since 1.0.0
  * @author Per Egil Roksvaag
- * @version 1.0.0
+ * @version 0.1.0
  */
 class Main {
 	/**
@@ -62,7 +61,7 @@ class Main {
 	 * @var string The plugin version.
 	 * @todo Set your plugin version number.
 	 */
-	const VERSION = '1.0.0';
+	const VERSION = '0.1.0';
 
 	/**
 	 * Only requirement constants > '0' will be checked.
@@ -140,11 +139,11 @@ class Main {
 			__NAMESPACE__ . '\Setup' => static::plugin_path( 'includes/setup.php' ),
 			__NAMESPACE__ . '\Admin' => static::plugin_path( 'includes/admin.php' ),
 
-			__NAMESPACE__ . '\Singleton' => static::plugin_path( 'tools/singleton.php' ),
-			__NAMESPACE__ . '\Asset'     => static::plugin_path( 'tools/asset.php' ),
-			__NAMESPACE__ . '\Modal'     => static::plugin_path( 'tools/modal.php' ),
-			__NAMESPACE__ . '\Utils'     => static::plugin_path( 'tools/utils.php' ),
-			__NAMESPACE__ . '\Download'  => static::plugin_path( 'tools/download.php' ),
+			__NAMESPACE__ . '\Singleton' => static::plugin_path( 'includes/tools/singleton.php' ),
+			__NAMESPACE__ . '\Asset'     => static::plugin_path( 'includes/tools/asset.php' ),
+			__NAMESPACE__ . '\Modal'     => static::plugin_path( 'includes/tools/modal.php' ),
+			__NAMESPACE__ . '\Utils'     => static::plugin_path( 'includes/tools/utils.php' ),
+			__NAMESPACE__ . '\Download'  => static::plugin_path( 'includes/tools/download.php' ),
 		) );
 
 		spl_autoload_register( function ( $name ) use ( $classes ) {
