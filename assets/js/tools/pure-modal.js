@@ -13,14 +13,17 @@
 
 	Modal.prototype.init = function () {
 		this.dispatch('pureModalInit', { modal: this });
+		const id = this.container.getAttribute('id');
 
-		document.querySelectorAll('.' + this.container.id).forEach(function (trigger) {
-			trigger.addEventListener('click', function (event) {
-				event.preventDefault();
-				event.stopPropagation();
-				this.open.call(this);
-			}.bind(this));
-		}, this);
+		if (Boolean(id)) {
+			document.querySelectorAll('.' + id).forEach(function (trigger) {
+				trigger.addEventListener('click', function (event) {
+					event.preventDefault();
+					event.stopPropagation();
+					this.open.call(this);
+				}.bind(this));
+			}, this);
+		}
 
 		this.container.querySelectorAll('data.pure-modal-load').forEach(function (data) {
 			this.load(data.value, function (status, response) {

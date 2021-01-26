@@ -52,7 +52,7 @@
     display: none;
 }
 
-.pure-modal-container.simple {
+.pure-modal-container.simple-type {
     padding: 1em;
 }
 
@@ -91,26 +91,7 @@
     transition: all .2s ease-out;
 }
 
-.pure-modal-trigger {
-    border-radius: .25em;
-    padding: .5em 1em;
-    font-weight: 600;
-    transition: all .2s ease-out;
-}
-
-a.pure-modal-trigger {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: #fff;
-    text-decoration: none;
-}
-
-button.pure-modal-trigger {
-    display: inline-block;
-    outline: none;
-}
-
-a.pure-modal-trigger:hover, .pure-modal-button:hover {
+.pure-modal-button:hover {
     background-color: #0069d9;
     border-color: #0062cc;
 }

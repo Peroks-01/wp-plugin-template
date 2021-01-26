@@ -46,9 +46,9 @@ class Modal {
 	public function init() {
 
 		//	Add shortcodes
-		add_shortcode( Main::PREFIX . '_modal', array( $this, 'modal_shortcode' ) );
-		add_shortcode( Main::PREFIX . '_modal_trigger', array( $this, 'modal_trigger' ) );
-		add_shortcode( Main::PREFIX . '_modal_container', array( $this, 'modal_container' ) );
+		add_shortcode( Main::PREFIX . '_modal', array( $this, 'shortcode' ) );
+		add_shortcode( Main::PREFIX . '_modal_trigger', array( $this, 'trigger' ) );
+		add_shortcode( Main::PREFIX . '_modal_container', array( $this, 'container' ) );
 
 		//	Enqueue frontend styles and scripts
 		if ( empty( is_admin() ) ) {
@@ -85,7 +85,7 @@ class Modal {
 	 * @param string $shortcode The shortcode name.
 	 * @return string The modal trigger html
 	 */
-	public function modal_shortcode( $args = array(), $content = '', $shortcode = '' ) {
+	public function shortcode( $args = array(), $content = '', $shortcode = '' ) {
 		foreach ( array_change_key_case( $args ) as $key => $value ) {
 			if ( strpos( $key, '_' ) ) {
 				list( $prefix, $name )   = explode( '_', $key );
@@ -96,8 +96,8 @@ class Modal {
 		$trigger   = $var['trigger']   ?? array();
 		$container = $var['container'] ?? array();
 
-		$trigger['container'] = $this->modal_container( $container, $content, $shortcode );
-		return $this->modal_trigger( $trigger );
+		$trigger['container'] = $this->container( $container, $content, $shortcode );
+		return $this->trigger( $trigger );
 	}
 
 	/**
@@ -106,34 +106,26 @@ class Modal {
 	 * @param array $args An array of shortcode attributes.
 	 * @return string The modal trigger html
 	 */
-	public function modal_trigger( $args = array() ) {
+	public function trigger( $args = array() ) {
 		$args = array_change_key_case( $args );
 		$args = wp_parse_args( $args, array(
 			'container' => '',
-			'type'      => 'link',
+			'type'      => 'button',
 			'class'     => array(),
 			'icon'      => '',
 			'text'      => __( 'Open', '[plugin-text-domain]' ),
 		) );
 
-		$class   = Utils::instance()->parse_class( $args['class'] );
-		$class[] = 'pure-modal-trigger';
-		$class[] = $args['type'];
-		$class[] = $args['container'];
+		$template = $args['type'];
 
-		$type  = $args['type'];
-		$types = array(
-			'link'   => '<a class="%s" href="javascript:void(0);">%s%s</a>',
-			'button' => '<button class="%s">%s%s</button>',
-		);
+		$args['class']   = Utils::instance()->parse_class( $args['class'] );
+		$args['class'][] = 'pure-modal-trigger';
+		$args['class'][] = $template . '-type';
+		$args['class'][] = $args['container'];
 
-		$trigger = vsprintf( $types[ $type ], array(
-			esc_attr( join( ' ', $class ) ),
-			wp_kses_post( $args['icon'] ),
-			wp_kses_post( $args['text'] ),
-		) );
-
-		return apply_filters( self::FILTER_MODAL_TRIGGER, $trigger, $args );
+		$callback = $this->get_template( $template, 'trigger' );
+		$trigger  = call_user_func( $callback, $args, $template );
+		return apply_filters( self::FILTER_MODAL_TRIGGER, $trigger, $args, $template );
 	}
 
 	/**
@@ -144,7 +136,7 @@ class Modal {
 	 * @param string $shortcode The shortcode name.
 	 * @return string The modal container ID.
 	 */
-	public function modal_container( $args = array(), $content = '', $shortcode = '' ) {
+	public function container( $args = array(), $content = '', $shortcode = '' ) {
 		$this->index++;
 		$id = sprintf( Main::instance()->plugin_prefix( 'modal-container-%d', '-' ), $this->index );
 		$id = apply_filters( self::FILTER_MODAL_ID, $id, $this->index );
@@ -153,7 +145,7 @@ class Modal {
 		$args = wp_parse_args( $args, array(
 			'id'    => $id,
 			'class' => array(),
-			'type'  => 'form',
+			'type'  => 'simple',
 			'defer' => false,
 			'load'  => '',
 		) );
@@ -163,10 +155,10 @@ class Modal {
 
 		$args['class']   = Utils::instance()->parse_class( $args['class'] );
 		$args['class'][] = 'pure-modal-container';
-		$args['class'][] = $template;
+		$args['class'][] = $template . '-type';
 
 		add_action( 'wp_footer', function () use ( $args, $content, $template ) {
-			$callback = $this->get_template( $template );
+			$callback = $this->get_template( $template, 'container' );
 			$container = call_user_func( $callback, $args, $content, $template );
 			echo apply_filters( self::FILTER_MODAL_CONTAINER, $container, $args, $content, $template );
 		}, 50 );
@@ -199,25 +191,62 @@ class Modal {
 	}
 
 	/**
-	 * Gets a modal container template callback function.
+	 * Gets a modal template callback function.
 	 *
-	 * @param string $template A registred template name: simple, section, form.
+	 * @param string $template A registred template name: link, button, simple, section, form.
+	 * @param string $type The template type: trigger or container.
 	 * @return callable A callback to a template function for rendering a modal container.
 	 */
-	public function get_template( $template ) {
+	public function get_template( $template, $type ) {
 		if ( empty( $this->templates ) ) {
 			$this->templates = apply_filters( self::FILTER_MODAL_TEMPLATES, array(
-				'simple'  => array( $this, 'template_simple' ),
-				'section' => array( $this, 'template_section' ),
-				'form'    => array( $this, 'template_form' ),
+				'trigger' => array(
+					'link'   => array( $this, 'trigger_link' ),
+					'button' => array( $this, 'trigger_button' ),
+				),
+				'container' => array(
+					'simple'  => array( $this, 'container_simple' ),
+					'section' => array( $this, 'container_section' ),
+					'form'    => array( $this, 'container_form' ),
+				),
 			) );
 		}
-		return $this->templates[ $template ] ?? '__return_empty_string';
+		return $this->templates[ $type ][ $template ] ?? '__return_empty_string';
 	}
 
 	/* -------------------------------------------------------------------------
 	 * Modal templates
 	 * ---------------------------------------------------------------------- */
+
+	/**
+	 * A template for rendering a link modal trigger.
+	 *
+	 * @param array $args An array of shortcode attributes.
+	 * @param string $template The template name.
+	 * @return string The modal trigger html.
+	 */
+	public function trigger_link( $args, $template = '' ) {
+		return vsprintf( '<a class="%s" href="javascript:void(0);">%s%s</a>', array(
+			esc_attr( join( ' ', $args['class'] ) ),
+			wp_kses_post( $args['icon'] ),
+			wp_kses_post( $args['text'] ),
+		) );
+	}
+
+	/**
+	 * A template for rendering a button modal trigger.
+	 *
+	 * @param array $args An array of shortcode attributes.
+	 * @param string $template The template name.
+	 * @return string The modal trigger html.
+	 */
+	public function trigger_button( $args, $template = '' ) {
+		return vsprintf( '<button class="%s">%s%s</button>', array(
+			esc_attr( join( ' ', $args['class'] ) ),
+			wp_kses_post( $args['icon'] ),
+			wp_kses_post( $args['text'] ),
+		) );
+	}
 
 	/**
 	 * A template for rendering a simple modal dialog container.
@@ -227,14 +256,12 @@ class Modal {
 	 * @param string $template The template name.
 	 * @return string The modal container html.
 	 */
-	public function template_simple( $args, $content, $template ) {
-		$body = vsprintf( '<div id="%s" class="%s">%s</div>', array(
+	public function container_simple( $args, $content, $template ) {
+		return vsprintf( '<div id="%s" class="%s">%s</div>', array(
 			esc_attr( $args['id'] ),
 			esc_attr( join( ' ', $args['class'] ) ),
 			$content,
 		) );
-
-		return apply_filters( self::FILTER_MODAL_BODY, $body, $args, $content, $template );
 	}
 
 	/**
@@ -245,7 +272,7 @@ class Modal {
 	 * @param string $template The template name.
 	 * @return string The modal container html.
 	 */
-	public function template_section( $args, $content, $template ) {
+	public function container_section( $args, $content, $template ) {
 		$args = wp_parse_args( $args, array(
 			'header' => true,
 			'body'   => true,
@@ -266,7 +293,7 @@ class Modal {
 
 		if ( $args['footer'] ) {
 			$text     = esc_html__( 'OK', '[plugin-text-domain]' );
-			$default  = sprintf( '<button type="button" class="pure-modal-button button">%s</button>', $text );
+			$default  = sprintf( '<button type="button" class="pure-modal-button">%s</button>', $text );
 			$buttons  = wp_kses_post( $args['buttons'] ?? $default );
 			$footer   = sprintf( '<div class="pure-modal-footer">%s</div>', $buttons );
 			$output[] = apply_filters( self::FILTER_MODAL_FOOTER, $footer, $args, $content, $template );
@@ -289,7 +316,7 @@ class Modal {
 	 * @param string $template The template name.
 	 * @return string The modal container html.
 	 */
-	public function template_form( $args, $content, $template ) {
+	public function container_form( $args, $content, $template ) {
 		global $wp;
 
 		$args = wp_parse_args( $args, array(
@@ -315,7 +342,7 @@ class Modal {
 
 		if ( $args['footer'] ) {
 			$text     = esc_html__( 'Submit', '[plugin-text-domain]' );
-			$default  = sprintf( '<button class="pure-modal-button submit">%s</button>', $text );
+			$default  = sprintf( '<button type="submit" class="pure-modal-button">%s</button>', $text );
 			$buttons  = wp_kses_post( $args['buttons'] ?? $default );
 			$footer   = sprintf( '<div class="pure-modal-footer">%s</div>', $buttons );
 			$output[] = apply_filters( self::FILTER_MODAL_FOOTER, $footer, $args, $content, $template );
