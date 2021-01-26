@@ -116,18 +116,18 @@ class Modal {
 			'text'      => __( 'Open', '[plugin-text-domain]' ),
 		) );
 
+		$class   = Utils::instance()->parse_class( $args['class'] );
+		$class[] = 'pure-modal-trigger';
+		$class[] = $args['type'];
+		$class[] = $args['container'];
+
 		$type  = $args['type'];
 		$types = array(
 			'link'   => '<a class="%s" href="javascript:void(0);">%s%s</a>',
 			'button' => '<button class="%s">%s%s</button>',
 		);
 
-		$class   = Utils::instance()->parse_class( $args['class'] );
-		$class[] = 'pure-modal-trigger';
-		$class[] = $type;
-		$class[] = $args['container'];
-
-		$trigger = vsprintf( $types[ $type ] ?? 'link', array(
+		$trigger = vsprintf( $types[ $type ], array(
 			esc_attr( join( ' ', $class ) ),
 			wp_kses_post( $args['icon'] ),
 			wp_kses_post( $args['text'] ),
