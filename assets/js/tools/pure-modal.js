@@ -73,7 +73,7 @@
 
 		this.dialog = this.overlay.appendChild(document.createElement('div'));
 		this.dialog.setAttribute('class', 'pure-modal-dialog');
-		this.dialog.setAttribute('style', 'position: relative; margin: 32px auto');
+		this.dialog.setAttribute('style', 'position: relative; margin: 0 auto');
 
 		const close = this.dialog.appendChild(document.createElement('div'));
 		close.setAttribute('class', 'pure-modal-close');
@@ -106,15 +106,16 @@
 	/* ===== Utils ========================= */
 
 	Modal.prototype.setPosition = function () {
-		let diff = (this.overlay.clientHeight - this.dialog.scrollHeight) / 2;
-		this.dialog.style.marginTop = Math.max(diff, this.options.marginTop || 32) + 'px';
+		const diff = (this.overlay.clientHeight - this.dialog.scrollHeight) >> 1;
+		const pad = parseInt(window.getComputedStyle(this.overlay).paddingTop);
+		this.dialog.style.marginTop = Math.max(diff - pad, 0) + 'px';
 	}
 
 	Modal.prototype.removeScroll = function () {
-		var scrollbar = (window.innerWidth - document.documentElement.clientWidth) + 'px';
+		const scrollbar = window.innerWidth - document.documentElement.clientWidth;
 		document.documentElement.style.overflow = 'hidden';
 		document.body.style.overflow = 'hidden';
-		document.body.style.paddingRight = scrollbar;
+		document.body.style.paddingRight = scrollbar + 'px';
 	}
 
 	Modal.prototype.resetScroll = function () {

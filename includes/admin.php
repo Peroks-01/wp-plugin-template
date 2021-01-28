@@ -128,7 +128,7 @@ class Admin {
 			printf( '<h1>%s</h1>', get_admin_page_title() );
 			printf( '<form method="post" action="options.php">' );
 
-			settings_fields( Main::PREFIX );		//	Group name
+			settings_fields( Main::PREFIX );	//	Group name
 			do_settings_sections( self::PAGE );	//	Menu page slug
 			submit_button();
 
