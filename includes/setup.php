@@ -2,7 +2,6 @@
 /**
  * Plugin setup.
  *
- * @since 1.0.0
  * @author Per Egil Roksvaag
  */
 class Setup {

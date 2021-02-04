@@ -7,7 +7,6 @@ use ZipArchive;
 /**
  * The Plugin admin settings page.
  *
- * @since 1.0.0
  * @author Per Egil Roksvaag
  */
 class Download {
@@ -67,7 +66,6 @@ class Download {
 	/**
 	 * Adds download links to all plugins on the Plugins page.
 	 *
-	 * @since 1.0.0
 	 * @param array $actions An array of plugin action links.
 	 * @param string $plugin_file Path to the plugin file relative to the plugins directory.
 	 * @return array The modified action links.
@@ -244,8 +242,6 @@ class Download {
 
 	/**
 	 * Registers settings, sections and fields.
-	 *
-	 * @since 1.0.0
 	 */
 	public function add_settings() {
 
@@ -280,8 +276,6 @@ class Download {
 
 	/**
 	 * Sets plugin default setting on activation.
-	 *
-	 * @since 1.0.0
 	 */
 	public function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
@@ -296,8 +290,6 @@ class Download {
 
 	/**
 	 * Removes settings on plugin deletion.
-	 *
-	 * @since 1.0.0
 	 */
 	public function delete() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {

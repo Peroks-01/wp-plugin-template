@@ -2,7 +2,6 @@
 /**
  * Implements the singleton pattern.
  *
- * @since 1.0.0
  * @author Per Egil Roksvaag
  */
 trait Singleton {

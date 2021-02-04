@@ -2,7 +2,6 @@
 /**
  * The Plugin admin settings page.
  *
- * @since 1.0.0
  * @author Per Egil Roksvaag
  */
 class Admin {
@@ -300,6 +299,52 @@ class Admin {
 				$this->array_to_attr( $attributes ),
 			) );
 			printf( ' <span>%s</span>', wp_kses_post( $param->description ) );
+		}, $param->page, $param->section, array( 'label_for' => esc_attr( $param->option ) ) );
+	}
+
+	/**
+	 * Adds a text input field to a section on an admin page.
+	 *
+	 * Wrapper for register_setting and add_settings_field.
+	 *
+	 * @param array $args An array of arguments with the below key/value pairs:
+	 * @var string option The field id (slug)
+	 * @var string section The section id (slug)
+	 * @var string page The menu slug of the page to display the field
+	 * @var string group The option group id
+	 * @var string label The field label
+	 * @var string description The field description
+	 */
+	public function add_text( $args ) {
+		$param = (object) wp_parse_args( $args, array(
+			'option'      => '',
+			'section'     => '',
+			'page'        => '',
+			'group'       => Main::PREFIX,
+			'label'       => '',
+			'description' => '',
+		) );
+
+		register_setting( $param->group, $param->option, array(
+			'type'              => 'string',
+			'default'           => '',
+			'sanitize_callback' => function ( $value ) {
+				return sanitize_text_field( trim( $value ) );
+			},
+		) );
+
+		add_settings_field( $param->option, $param->label, function () use ( $param ) {
+			$whitelist = array_flip( array(	'maxlength', 'minlength', 'readonly' ) );
+			$attributes = array_intersect_key( (array) $param, $whitelist );
+
+			vprintf( '<input type="text" id="%s" class="regular-text" name="%s" value="%s"%s>', array(
+				esc_attr( $param->option ),
+				esc_attr( $param->option ),
+				get_option( $param->option ),
+				$this->array_to_attr( $attributes ),
+			) );
+
+			printf( '<p class="description">%s</p>', wp_kses_post( $param->description ) );
 		}, $param->page, $param->section, array( 'label_for' => esc_attr( $param->option ) ) );
 	}
 
