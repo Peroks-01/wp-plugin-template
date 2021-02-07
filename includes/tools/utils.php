@@ -74,4 +74,27 @@ class Utils {
 		the_widget( $widget, $instance, $args );
 		return apply_filters( self::FILTER_GET_WIDGET, ob_get_clean(), $instance, $args );
 	}
+
+	/**
+	 * Gets all post IDs and meta values of the given meta key.
+	 *
+	 * @param string $key The meta key
+	 * @param string $status The post status to include in the result
+	 * @return array An array of objects (post_id, meta_value)
+	 */
+	public function get_meta_table( $key, $status = 'publish' ) {
+		global $wpdb;
+
+		$key    = sanitize_key( $key );
+		$status = sanitize_key( $status );
+
+		$query[] = 'SELECT pm.post_id, pm.meta_value';
+		$query[] = "FROM   {$wpdb->prefix}postmeta AS pm";
+		$query[] = "JOIN   {$wpdb->prefix}posts AS p ON pm.post_id = p.ID";
+		$query[] = 'WHERE  pm.meta_key = %s AND p.post_status = %s';
+		$query[] = 'ORDER  BY pm.meta_value';
+
+		$sql = $wpdb->prepare( join( "\n", $query ), compact( 'key', 'status') );
+		return $wpdb->get_results( $sql, OBJECT );
+	}
 }
