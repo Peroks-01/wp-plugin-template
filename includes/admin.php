@@ -242,7 +242,7 @@ class Admin {
 		register_setting( $param->group, $param->option, array(
 			'type'              => 'integer',
 			'default'           => 0,
-			'sanitize_callback' => function ( $value ) {
+			'sanitize_callback' => $param->sanitize ?? function ( $value ) {
 				return $value ? 1 : 0;
 			},
 		) );
@@ -283,7 +283,7 @@ class Admin {
 		register_setting( $param->group, $param->option, array(
 			'type'              => 'integer',
 			'default'           => 0,
-			'sanitize_callback' => function ( $value ) {
+			'sanitize_callback' => $param->sanitize ?? function ( $value ) {
 				return (int) $value;
 			},
 		) );
@@ -328,7 +328,7 @@ class Admin {
 		register_setting( $param->group, $param->option, array(
 			'type'              => 'string',
 			'default'           => '',
-			'sanitize_callback' => function ( $value ) {
+			'sanitize_callback' => $param->sanitize ?? function ( $value ) {
 				return sanitize_text_field( trim( $value ) );
 			},
 		) );
