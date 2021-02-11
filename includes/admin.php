@@ -127,7 +127,7 @@ class Admin {
 			printf( '<h1>%s</h1>', get_admin_page_title() );
 			printf( '<form method="post" action="options.php">' );
 
-			settings_fields( Main::PREFIX );	//	Group name
+			settings_fields( self::PAGE );		//	Group name
 			do_settings_sections( self::PAGE );	//	Menu page slug
 			submit_button();
 
@@ -206,7 +206,7 @@ class Admin {
 	public function add_section( $args ) {
 		$param = (object) wp_parse_args( $args, array(
 			'section'     => '',
-			'page'        => '',
+			'page'        => self::PAGE,
 			'label'       => '',
 			'description' => '',
 		) );
@@ -233,8 +233,8 @@ class Admin {
 		$param = (object) wp_parse_args( $args, array(
 			'option'      => '',
 			'section'     => '',
-			'page'        => '',
-			'group'       => Main::PREFIX,
+			'page'        => self::PAGE,
+			'group'       => $args['page'] ?? self::PAGE,
 			'label'       => '',
 			'description' => '',
 		) );
@@ -274,8 +274,8 @@ class Admin {
 		$param = (object) wp_parse_args( $args, array(
 			'option'      => '',
 			'section'     => '',
-			'page'        => '',
-			'group'       => Main::PREFIX,
+			'page'        => self::PAGE,
+			'group'       => $args['page'] ?? self::PAGE,
 			'label'       => '',
 			'description' => '',
 		) );
@@ -319,8 +319,8 @@ class Admin {
 		$param = (object) wp_parse_args( $args, array(
 			'option'      => '',
 			'section'     => '',
-			'page'        => '',
-			'group'       => Main::PREFIX,
+			'page'        => self::PAGE,
+			'group'       => $args['page'] ?? self::PAGE,
 			'label'       => '',
 			'description' => '',
 		) );
