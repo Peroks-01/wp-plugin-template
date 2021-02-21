@@ -258,6 +258,53 @@ class Admin {
 	}
 
 	/**
+	 * Adds multiple checkboxes to a section on an admin page.
+	 *
+	 * Wrapper for register_setting and add_settings_field.
+	 *
+	 * @param array $args An array of arguments with the below key/value pairs:
+	 * @var string option The field id (slug)
+	 * @var string section The section id (slug)
+	 * @var string page The menu slug of the page to display the field
+	 * @var string group The option group id
+	 * @var string label The field label
+	 * @var string description The field description
+	 */
+	public function add_multibox( $args ) {
+		$param = (object) wp_parse_args( $args, array(
+			'option'      => '',
+			'section'     => '',
+			'page'        => self::PAGE,
+			'group'       => $args['page'] ?? self::PAGE,
+			'label'       => '',
+			'description' => '',
+			'terms'       => array(),
+		) );
+
+		register_setting( $param->group, $param->option, array(
+			'type'              => 'array',
+			'default'           => array(),
+			'sanitize_callback' => $param->sanitize ?? function ( $value ) {
+				return (array) $value;
+			},
+		) );
+
+		add_settings_field( $param->option, $param->label, function () use ( $param ) {
+			$value = get_option( $param->option ) ?: array();
+
+			foreach ( $param->terms as $key => $term ) {
+				vprintf( '<input type="checkbox" name="%s[]" value="%s"%s>', array(
+					esc_attr( $param->option ),
+					esc_attr( is_string( $key ) ? $key : $term ),
+					in_array( $term, $value ) ? ' checked' : '',
+				) );
+				printf( '<span>%s</span>&nbsp;&nbsp; ', esc_attr( $term ) );
+			}
+			printf( '<p class="description">%s</p>', wp_kses_post( $param->description ) );
+		}, $param->page, $param->section, array() );
+	}
+
+	/**
 	 * Adds a numeric input field to a section on an admin page.
 	 *
 	 * Wrapper for register_setting and add_settings_field.

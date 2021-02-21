@@ -62,6 +62,61 @@ class Utils {
 	}
 
 	/**
+	 * Removes a class method hook without having the class instance.
+	 *
+	 * @param string $tag The add_action or add_filter hook to remove.
+	 * @param string $class The instance class.
+	 * @param string $method The hooked class method.
+	 * @param int $priority The priority the hook was registred with.
+	 * @return int The number of times the hook was removed.
+	 */
+	public function remove_hook( $tag, $class = '', $method = '', $priority = 10 ) {
+		global $wp_filter;
+		$hook  = $wp_filter[ $tag ]->callbacks[ $priority ] ?? array();
+		$func  = array_column( $hook, 'function' );
+		$count = 0;
+
+		foreach ( $func as $callback ) {
+			if ( is_array( $callback ) && count( $callback ) == 2 ) {
+				if ( empty( $class ) || ( is_object( $callback[0] ) ? get_class( $callback[0] ) : $callback[0] ) == $class ) {
+					if ( empty( $method ) || $callback[1] == $method ) {
+						remove_filter( $tag, $callback, $priority );
+						$count++;
+					}
+				}
+			}
+		}
+		return $count;
+	}
+
+	/**
+	 * Gets class method callbacks hooked to the given tag.
+	 *
+	 * @param string $tag The add_action or add_filter hook.
+	 * @param string $class The instance class.
+	 * @param string $method The hooked class method.
+	 * @param int $priority The priority the hook was registred with.
+	 * @return callback[] An array of class::mehtod() callbacks.
+	 */
+	public function get_hook_callback( $tag, $class = '', $method = '', $priority = 10 ) {
+		global $wp_filter;
+		$hook   = $wp_filter[ $tag ]->callbacks[ $priority ] ?? array();
+		$func   = array_column( $hook, 'function' );
+		$result = array();
+
+		foreach ( $func as $callback ) {
+			if ( is_array( $callback ) && count( $callback ) == 2 ) {
+				if ( empty( $class ) || get_class( $callback[0] ) == $class ) {
+					if ( empty( $method ) || $callback[1] == $method ) {
+						$result[] = $callback;
+					}
+				}
+			}
+		}
+		return $result;
+	}
+
+	/**
 	 * Captures and returns the widget output.
 	 *
 	 * @param string $widget The widget's PHP class name.
