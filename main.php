@@ -143,6 +143,7 @@ class Main {
 			__NAMESPACE__ . '\Asset'     => static::plugin_path( 'includes/tools/asset.php' ),
 			__NAMESPACE__ . '\Modal'     => static::plugin_path( 'includes/tools/modal.php' ),
 			__NAMESPACE__ . '\Utils'     => static::plugin_path( 'includes/tools/utils.php' ),
+			__NAMESPACE__ . '\Form'      => static::plugin_path( 'includes/tools/form.php' ),
 			__NAMESPACE__ . '\Download'  => static::plugin_path( 'includes/tools/download.php' ),
 		) );
 

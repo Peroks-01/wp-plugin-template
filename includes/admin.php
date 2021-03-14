@@ -30,8 +30,8 @@ class Admin {
 		$name = plugin_basename( Main::FILE );
 
 		//	Adds a top level or a submenu page to the admin menu (or both).
-		add_action( 'admin_menu', array( $this, 'admin_top_menu' ) );
-		add_action( 'admin_menu', array( $this, 'admin_sub_menu' ) );
+		add_action( 'admin_menu', array( $this, 'admin_top_menu' ), 5 );
+		add_action( 'admin_menu', array( $this, 'admin_sub_menu' ), 5 );
 
 		//	Displays a "Settings" and a "Support" link on the Plugins page.
 		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
@@ -226,6 +226,7 @@ class Admin {
 	 * @var string section The section id (slug)
 	 * @var string page The menu slug of the page to display the field
 	 * @var string group The option group id
+	 * @var string default The option default value
 	 * @var string label The field label
 	 * @var string description The field description
 	 */
@@ -235,13 +236,14 @@ class Admin {
 			'section'     => '',
 			'page'        => self::PAGE,
 			'group'       => $args['page'] ?? self::PAGE,
+			'default'     => 0,
 			'label'       => '',
 			'description' => '',
 		) );
 
 		register_setting( $param->group, $param->option, array(
 			'type'              => 'integer',
-			'default'           => 0,
+			'default'           => $param->default,
 			'sanitize_callback' => $param->sanitize ?? function ( $value ) {
 				return $value ? 1 : 0;
 			},
@@ -267,6 +269,7 @@ class Admin {
 	 * @var string section The section id (slug)
 	 * @var string page The menu slug of the page to display the field
 	 * @var string group The option group id
+	 * @var string default The option default value
 	 * @var string label The field label
 	 * @var string description The field description
 	 */
@@ -276,6 +279,7 @@ class Admin {
 			'section'     => '',
 			'page'        => self::PAGE,
 			'group'       => $args['page'] ?? self::PAGE,
+			'default'     => 0,
 			'label'       => '',
 			'description' => '',
 			'terms'       => array(),
@@ -283,6 +287,7 @@ class Admin {
 
 		register_setting( $param->group, $param->option, array(
 			'type'              => 'array',
+			'default'           => $param->default,
 			'default'           => array(),
 			'sanitize_callback' => $param->sanitize ?? function ( $value ) {
 				return (array) $value;
@@ -314,6 +319,7 @@ class Admin {
 	 * @var string section The section id (slug)
 	 * @var string page The menu slug of the page to display the field
 	 * @var string group The option group id
+	 * @var string default The option default value
 	 * @var string label The field label
 	 * @var string description The field description
 	 */
@@ -323,13 +329,14 @@ class Admin {
 			'section'     => '',
 			'page'        => self::PAGE,
 			'group'       => $args['page'] ?? self::PAGE,
+			'default'     => 0,
 			'label'       => '',
 			'description' => '',
 		) );
 
 		register_setting( $param->group, $param->option, array(
 			'type'              => 'integer',
-			'default'           => 0,
+			'default'           => $param->default,
 			'sanitize_callback' => $param->sanitize ?? function ( $value ) {
 				return (int) $value;
 			},
@@ -359,6 +366,7 @@ class Admin {
 	 * @var string section The section id (slug)
 	 * @var string page The menu slug of the page to display the field
 	 * @var string group The option group id
+	 * @var string default The option default value
 	 * @var string label The field label
 	 * @var string description The field description
 	 */
@@ -368,13 +376,14 @@ class Admin {
 			'section'     => '',
 			'page'        => self::PAGE,
 			'group'       => $args['page'] ?? self::PAGE,
+			'default'     => '',
 			'label'       => '',
 			'description' => '',
 		) );
 
 		register_setting( $param->group, $param->option, array(
 			'type'              => 'string',
-			'default'           => '',
+			'default'           => $param->default,
 			'sanitize_callback' => $param->sanitize ?? function ( $value ) {
 				return sanitize_text_field( trim( $value ) );
 			},
@@ -393,6 +402,87 @@ class Admin {
 
 			printf( '<p class="description">%s</p>', wp_kses_post( $param->description ) );
 		}, $param->page, $param->section, array( 'label_for' => esc_attr( $param->option ) ) );
+	}
+
+	/**
+	 * Adds a file input field to upload a json file.
+	 *
+	 * Wrapper for register_setting and add_settings_field.
+	 *
+	 * @param array $args An array of arguments with the below key/value pairs:
+	 * @var string option The field id (slug)
+	 * @var string section The section id (slug)
+	 * @var string page The menu slug of the page to display the field
+	 * @var string group The option group id
+	 * @var string default The option default value
+	 * @var string label The field label
+	 * @var string description The field description
+	 */
+	public function add_json( $args ) {
+		$param = (object) wp_parse_args( $args, array(
+			'option'      => '',
+			'section'     => '',
+			'page'        => self::PAGE,
+			'group'       => $args['page'] ?? self::PAGE,
+			'default'     => array(),
+			'label'       => '',
+			'download'    => '',
+			'description' => '',
+		) );
+
+		$this->download( $param->option );
+
+		register_setting( $param->group, $param->option, array(
+			'type'              => 'array',
+			'default'           => $param->default,
+			'sanitize_callback' => $param->sanitize ?? function ( $value ) use ( $param ) {
+				if ( $file = $_FILES[ $param->option ] ?? null ) {
+					if ( empty( $file['error'] ) && is_readable( $file['tmp_name'] ) ) {
+						if ( $data = json_decode( file_get_contents( $file['tmp_name'] ) ) ) {
+							return (array) $data;
+						}
+					}
+				}
+				return (array) get_option( $param->option ) ?: array();
+			},
+		) );
+
+		add_settings_field( $param->option, $param->label, function () use ( $param ) {
+			$whitelist = array_flip( array(	'maxlength', 'minlength', 'readonly' ) );
+			$attributes = array_intersect_key( (array) $param, $whitelist );
+
+			vprintf( '<input type="file" id="%s" name="%s"%s>', array(
+				esc_attr( $param->option ),
+				esc_attr( $param->option ),
+				$this->array_to_attr( $attributes ),
+			) );
+
+			vprintf( '<p class="description"><a href="%s">%s</a></p>', array(
+				add_query_arg( 'download', $param->option, menu_page_url( self::PAGE, false ) ),
+				wp_kses_post( $param->download ),
+			) );
+		}, $param->page, $param->section, array( 'label_for' => esc_attr( $param->option ) ) );
+	}
+
+	/**
+	 * Transforms an option to a JSON file and downloads it.
+	 *
+	 * @var string option The option id (slug)
+	 */
+	protected function download( $option ) {
+		if ( filter_input( INPUT_GET, 'download', FILTER_SANITIZE_STRING ) == $option ) {
+			$flags    = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT;
+			$download = json_encode( get_option( $option, array() ), $flags );
+			$name     = str_replace( '_', '-', $option ) . '.json';
+
+			header( 'Content-Disposition: attachment; filename="' . $name . '"' );
+			header( 'Content-Type: application/json' );
+			header( 'Content-Length: ' . strlen( $download ) );
+
+			echo $download;
+			flush();
+			exit();
+		}
 	}
 
 	/**

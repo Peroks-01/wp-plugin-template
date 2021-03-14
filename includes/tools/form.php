@@ -1,4 +1,4 @@
-<?php namespace peroks\ioutlet\foxway;
+<?php namespace peroks\plugin_customer\plugin_package;
 /**
  * Displays input fields and forms.
  *
@@ -243,13 +243,53 @@ class Form {
 			'type' => 'textarea',
 		) );
 
-		$output = vsprintf( '<textarea class="curafun-game-field" %s>%s</textarea>', array(
+		$output = vsprintf( '<textarea class="peroks-form-control"%s>%s</textarea>', array(
 			$this->clean_attibutes( $attr, $attr['type'] ),
 			trim( esc_html( $attr['value'] ?? '' ) ),
 		) );
 
 		$output = $this->label( $attr, $output );
 		return $this->field( $attr, $output );
+	}
+
+	/**
+	 * Displays a select form field.
+	 *
+	 * @param array $attr HTML attributes as key/value pairs.
+	 * @return string Html
+	 */
+	public function select( $attr ) {
+		$attr = wp_parse_args( $attr, array(
+			'type'        => 'select',
+			'placeholder' => null,
+			'options'     => array(),
+			'value'       => '',
+		) );
+
+		$placeholder = $attr['placeholder'];
+		$value       = $attr['value'];
+		$options     = array();
+
+		if ( isset( $placeholder ) ) {
+			$options[] = sprintf( '<option value="">%s</option>', esc_html( $placeholder ) );
+		}
+
+		foreach ( $attr['options'] as $key => $option ) {
+			$key       = is_string( $key ) ? $key : $option;
+			$options[] = vsprintf( '<option value="%s" %s>%s</option>', array(
+				esc_attr( $key ),
+				selected( $key, $value, false ),
+				esc_html( $option ),
+			) );
+		}
+
+		$html = vsprintf( '<select class="peroks-form-control"%s>%s</select>', array(
+			$this->clean_attibutes( $attr, $attr['type'] ),
+			join( "\n", $options ),
+		) );
+
+		$html = apply_filters( self::FILTER_FORM_CONTROL, $html, $attr );
+		return $this->field( $attr, $this->label( $attr, $html ) );
 	}
 
 	/**
@@ -261,7 +301,7 @@ class Form {
 	public function button( array $attr = array() ) {
 		$attr = wp_parse_args( $attr, array(
 			'type'  => 'button',
-			'value' => __( 'Submit', 'curafun-game-integration' ),
+			'value' => __( 'Submit', '[plugin-text-domain]' ),
 		) );
 
 		$output[] = vsprintf( '<button class="peroks-form-control"%s>%s</button>', array(
@@ -491,6 +531,8 @@ class Form {
 				return array_merge( $all, $submit, $image );
 			case 'textarea':
 				return array_merge( $all, $text, $textarea );
+			case 'select':
+				return array_merge( $all );
 			case 'submit':
 			case 'button':
 				return array_merge( $all, $submit );
