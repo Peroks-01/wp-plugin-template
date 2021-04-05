@@ -6,7 +6,8 @@
  * @author Per Egil Roksvaag
  * @method static Utils instance() Gets the singleton class instance
  */
-class Utils {
+class Utils
+{
 	use Singleton;
 
 	/**
@@ -29,6 +30,39 @@ class Utils {
 		return array_filter( $array, function ( $value ) {
 			return isset( $value );
 		} );
+	}
+
+	/**
+	 * Adds a value to an array.
+	 *
+	 * @param array $array The array
+	 * @param mixed $value The value to add to the array;
+	 * @param string $pos Where to add the value: 'begin' or 'end';
+	 * @param bool $unique Whether the added value must be unique (true) or not (false).
+	 * @param bool $strict Whether a strict type comparison is performed (true) or not (false).
+	 */
+	public function add_value( $array, $value, $pos = 'end', $unique = true, $strict = false ) {
+		if ( empty( $unique ) || is_bool( array_search( $value, $array, $strict ) ) ) {
+			switch ( $pos ) {
+				case 'begin': array_unshift( $array, $value ); break;
+				case 'end': array_push( $array, $value ); break;
+			}
+		}
+		return $array;
+	}
+
+	/**
+	 * Removes a value from an array.
+	 *
+	 * @param array $array The array
+	 * @param mixed $value The value to remove from the array;
+	 * @param bool $strict Whether a strict type comparison is performed (true) or not (false).
+	 */
+	public function remove_value( $array, $value, $strict = false ) {
+		if ( is_int( $index = array_search( $value, $array, $strict ) ) ) {
+			unset( $array[ $index ] );
+		}
+		return $array;
 	}
 
 	/**
