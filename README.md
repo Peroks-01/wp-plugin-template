@@ -3,7 +3,7 @@
 [This plugin description]
 
 ## Plugin home
-* https://github.com/Peroks-01/wp-plugin-template
+* https://github.com/peroks/wp-plugin-template
 
 ## Authors
 * [Per Egil Roksvaag](https://codeable.io/developers/per-egil-roksvaag/)

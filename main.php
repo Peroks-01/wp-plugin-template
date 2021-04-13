@@ -1,7 +1,7 @@
 <?php namespace peroks\plugin_customer\plugin_package;
 /*
  * Plugin Name:       [This Plugin Name]
- * Plugin URI:        https://github.com/Peroks-01/wp-plugin-template
+ * Plugin URI:        https://github.com/peroks/wp-plugin-template
  * Description:       [This plugin description]
  *
  * Text Domain:       [plugin-text-domain]
