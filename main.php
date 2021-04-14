@@ -140,13 +140,13 @@ class Main
 			__NAMESPACE__ . '\Setup' => static::plugin_path( 'includes/setup.php' ),
 			__NAMESPACE__ . '\Admin' => static::plugin_path( 'includes/admin.php' ),
 
-			__NAMESPACE__ . '\Singleton' => static::plugin_path( 'includes/tools/singleton.php' ),
-			__NAMESPACE__ . '\Asset'     => static::plugin_path( 'includes/tools/asset.php' ),
-			__NAMESPACE__ . '\Modal'     => static::plugin_path( 'includes/tools/modal.php' ),
-			__NAMESPACE__ . '\Utils'     => static::plugin_path( 'includes/tools/utils.php' ),
-			__NAMESPACE__ . '\Form'      => static::plugin_path( 'includes/tools/form.php' ),
-			__NAMESPACE__ . '\Update'    => static::plugin_path( 'includes/tools/update.php' ),
-			__NAMESPACE__ . '\Download'  => static::plugin_path( 'includes/tools/download.php' ),
+			__NAMESPACE__ . '\Singleton'  => static::plugin_path( 'includes/tools/singleton.php' ),
+			__NAMESPACE__ . '\Asset'      => static::plugin_path( 'includes/tools/asset.php' ),
+			__NAMESPACE__ . '\Modal'      => static::plugin_path( 'includes/tools/modal.php' ),
+			__NAMESPACE__ . '\Utils'      => static::plugin_path( 'includes/tools/utils.php' ),
+			__NAMESPACE__ . '\Form'       => static::plugin_path( 'includes/tools/form.php' ),
+			__NAMESPACE__ . '\Download'   => static::plugin_path( 'includes/tools/download.php' ),
+			__NAMESPACE__ . '\Repository' => static::plugin_path( 'includes/tools/repository.php' ),
 		) );
 
 		spl_autoload_register( function ( $name ) use ( $classes ) {
@@ -170,8 +170,8 @@ class Main
 
 		if ( is_admin() ) {
 			Admin::instance();
-			Update::instance();
 			Download::instance();
+			Repository::instance();
 		}
 	}
 

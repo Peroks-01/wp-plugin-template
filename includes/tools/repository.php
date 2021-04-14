@@ -1,29 +1,20 @@
 <?php namespace peroks\plugin_customer\plugin_package;
 /**
- * Enables automated plugin updated from GitHub.
+ * Enables automated plugin updates from a GitHub repopistory.
  *
  * @see https://www.smashingmagazine.com/2015/08/deploy-wordpress-plugins-with-github-using-transients/
  * @author Per Egil Roksvaag
  */
-class Update
+class Repository
 {
 	use Singleton;
 
 	/**
 	 * @var string Admin settings
 	 */
-	const SECTION_UPDATE      = Main::PREFIX . '_update';
-	const OPTION_UPDATE_TOKEN = self::SECTION_UPDATE . '_token';
-
-	/**
-	 * @var string The class filter hooks.
-	 */
-	const FILTER_UPDATE_SOMETHING = Main::PREFIX . '_update_something';
-
-	/**
-	 * @var string A GitHub Personal access token
-	 */
-	protected $token;
+	const SECTION_REPOSITORY      = Main::PREFIX . '_repository';
+	const OPTION_REPOSITORY_URL   = self::SECTION_REPOSITORY . '_url';
+	const OPTION_REPOSITORY_TOKEN = self::SECTION_REPOSITORY . '_token';
 
 	/**
 	 * @var object The latest release from the GitHub repository.
@@ -53,9 +44,10 @@ class Update
 	 * Activates automated plugin update.
 	 */
 	public function init() {
-		if ( $this->token = get_option( self::OPTION_UPDATE_TOKEN ) ) {
+		if ( get_option( self::OPTION_REPOSITORY_URL ) ) {
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_plugins' ) );
 			add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3);
+			add_filter( 'upgrader_pre_download', array( $this, 'upgrader_pre_download' ), 10, 4 );
 			add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 		}
 	}
@@ -83,11 +75,10 @@ class Update
 
 				//	Is a newer version available on GitHub?
 				if ( version_compare( $version, Main::VERSION, '>' ) ) {
-					$data   = get_plugin_data( Main::FILE );
 					$plugin = (object) array(
-						'url'         => $data['PluginURI'],
+						'url'         => get_option( self::OPTION_REPOSITORY_URL ),
 						'slug'        => current( explode( '/', $basename ) ),
-						'package'     => add_query_arg( 'access_token', $this->token, $release->zipball_url ),
+						'package'     => $release->zipball_url,
 						'new_version' => $version,
 					);
 
@@ -129,10 +120,36 @@ class Update
 					'Description' => $data['Description'],
 					'Updates'     => $release->body,
 				),
-				'download_link' => add_query_arg( 'access_token', $this->token, $release->zipball_url ),
+				'download_link' => $release->zipball_url,
 			);
 		}
 		return $result;
+	}
+
+	/**
+	 * Adds authorisation headers.
+	 *
+	 * @param bool $reply Whether to bail without returning the package. Default false.
+	 * @param string $package The package file name.
+	 * @param WP_Upgrader $upgrader The WP_Upgrader instance.
+	 * @param array $hook_extra Extra arguments passed to hooked filters.
+	 */
+	public function upgrader_pre_download ( $reply, $package, $upgrader, $hook_extra ) {
+		if ( $token = get_option( self::OPTION_REPOSITORY_TOKEN ) ) {
+			$release = $this->get_latest_release();
+			$base    = plugin_basename( Main::FILE );
+
+			if ( in_array( $base, $hook_extra ) && $package == $release->zipball_url ) {
+				add_filter( 'http_request_args', function ( $args, $url ) use ( $release, $token ) {
+					if ( isset( $args['filename'] ) && $url == $release->zipball_url ) {
+						$args['headers']['Authorization'] = "token {$token}";
+					}
+					return $args;
+				}, 10, 2 );
+			}
+		}
+
+		return $reply;
 	}
 
 	/**
@@ -146,14 +163,13 @@ class Update
 	public function upgrader_post_install( $response, $hook_extra, $result ) {
 		global $wp_filesystem;
 
-		$base       = plugin_basename( Main::FILE );
 		$plugin_dir = Main::instance()->plugin_path(); // Our plugin directory
 		$wp_filesystem->move( $result['destination'], $plugin_dir ); // Move files to the plugin dir
 		$result['destination'] = $plugin_dir; // Set the destination for the rest of the stack
 
 		//	Reactivate if the plugin was active
 		if ( $this->active ) {
-			activate_plugin( $base );
+			activate_plugin( plugin_basename( Main::FILE ) );
 		}
 
 		return $result;
@@ -166,21 +182,24 @@ class Update
 	/**
 	 * Gets the latest release of this plugin on GitHub.
 	 *
-	 * @return object The latest release of this plugin on GitHub.
+	 * @return bool|object|WP_Error The latest release of this plugin on GitHub.
 	 */
 	public function get_latest_release() {
 		if ( is_null( $this->release ) ) {
-			$data = get_plugin_data( Main::FILE );
-			$base = plugin_basename( Main::FILE );
+			$this->release = false;
 
-			$url  = parse_url( $data['PluginURI'] );
-			$host = trim( $url['host'] ?? null );
-			$path = trim( $url['path'] ?? null, '/' );
+			$repo = parse_url( get_option( self::OPTION_REPOSITORY_URL ) );
+			$host = trim( $repo['host'] ?? null );
+			$path = trim( $repo['path'] ?? null, '/' );
+			$args = array();
 
 			if ( 'github.com' == $host && strpos( $path, '/' ) ) {
+				if ( $token = get_option( self::OPTION_REPOSITORY_TOKEN ) ) {
+					$args['headers']['Authorization'] = "token {$token}";
+				}
+
 				$request  = "https://api.github.com/repos/{$path}/releases";
-				$request  = add_query_arg( 'access_token', $this->token, $request );
-				$response = wp_remote_get( $request );
+				$response = wp_remote_get( $request, $args );
 
 				if ( is_wp_error( $response ) ) {
 					return $response;
@@ -192,7 +211,7 @@ class Update
 				} );
 
 				$this->release = current( $releases );
-				$this->active  = is_plugin_active( $base );
+				$this->active  = is_plugin_active( plugin_basename( Main::FILE ) );
 			}
 		}
 		return $this->release;
@@ -207,20 +226,29 @@ class Update
 	 */
 	public function admin_init() {
 
-		// Update section
+		//	Repository section
 		Admin::instance()->add_section( array(
-			'section' => self::SECTION_UPDATE,
+			'section' => self::SECTION_REPOSITORY,
 			'page'    => Admin::PAGE,
-			'label'   => __( 'Update plugin from GitHub', '[plugin-text-domain]' ),
+			'label'   => __( 'Automated plugin update from a GitHub repository', '[plugin-text-domain]' ),
 		) );
 
-		//	New: Dimension group IDs
+		//	Repository url
 		Admin::instance()->add_text( array(
-			'option'      => self::OPTION_UPDATE_TOKEN,
-			'section'     => self::SECTION_UPDATE,
+			'option'      => self::OPTION_REPOSITORY_URL,
+			'section'     => self::SECTION_REPOSITORY,
 			'page'        => Admin::PAGE,
-			'label'       => __( 'Update access Token', '[plugin-text-domain]' ),
-			'description' => __( 'Enter an access token to get automated plugin updates.', '[plugin-text-domain]' ),
+			'label'       => __( 'GitHub Repository URL', '[plugin-text-domain]' ),
+			'description' => __( 'Enter the URL to the plugin repository on GitHub.', '[plugin-text-domain]' ),
+		) );
+
+		//	Repository token
+		Admin::instance()->add_text( array(
+			'option'      => self::OPTION_REPOSITORY_TOKEN,
+			'section'     => self::SECTION_REPOSITORY,
+			'page'        => Admin::PAGE,
+			'label'       => __( 'GitHub access Token', '[plugin-text-domain]' ),
+			'description' => __( 'Enter an access token for the plugin repository on GitHub.', '[plugin-text-domain]' ),
 		) );
 	}
 
@@ -229,8 +257,14 @@ class Update
 	 */
 	public function activate() {
 		if ( is_admin() && current_user_can( 'activate_plugins' ) ) {
-			if ( is_null( get_option( self::OPTION_UPDATE_TOKEN, null ) ) ) {
-				add_option( self::OPTION_UPDATE_TOKEN, '' );
+			if ( is_null( get_option( self::OPTION_REPOSITORY_URL, null ) ) ) {
+				$data  = (object) get_plugin_data( Main::FILE );
+				$host  = parse_url( $data->PluginURI, PHP_URL_HOST );
+				$value = 'github.com' == $host ? $data->PluginURI : '';
+				add_option( self::OPTION_REPOSITORY_URL, $value );
+			}
+			if ( is_null( get_option( self::OPTION_REPOSITORY_TOKEN, null ) ) ) {
+				add_option( self::OPTION_REPOSITORY_TOKEN, '' );
 			}
 		}
 	}
@@ -241,7 +275,8 @@ class Update
 	public function delete() {
 		if ( is_admin() && current_user_can( 'delete_plugins' ) ) {
 			if ( get_option( Admin::OPTION_DELETE_SETTINGS ) ) {
-				delete_option( self::OPTION_UPDATE_TOKEN );
+				delete_option( self::OPTION_REPOSITORY_URL );
+				delete_option( self::OPTION_REPOSITORY_TOKEN );
 			}
 		}
 	}
