@@ -23,7 +23,8 @@
  * @author Per Egil Roksvaag
  * @version 0.1.0
  */
-class Main {
+class Main
+{
 	/**
 	 * @var string The plugin file.
 	 */
@@ -103,12 +104,12 @@ class Main {
 	const OPTION_VERSION = self::PREFIX . '_version';
 
 	/**
-	 * @var object The class singleton.
+	 * @var Main The main plugin class singleton.
 	 */
 	protected static $_instance;
 
 	/**
-	 * @return object The class singleton.
+	 * @return Main The main plugin class singleton.
 	 */
 	public static function instance() {
 		if ( is_null( static::$_instance ) && static::check() ) {
@@ -144,6 +145,7 @@ class Main {
 			__NAMESPACE__ . '\Modal'     => static::plugin_path( 'includes/tools/modal.php' ),
 			__NAMESPACE__ . '\Utils'     => static::plugin_path( 'includes/tools/utils.php' ),
 			__NAMESPACE__ . '\Form'      => static::plugin_path( 'includes/tools/form.php' ),
+			__NAMESPACE__ . '\Update'    => static::plugin_path( 'includes/tools/update.php' ),
 			__NAMESPACE__ . '\Download'  => static::plugin_path( 'includes/tools/download.php' ),
 		) );
 
@@ -168,6 +170,7 @@ class Main {
 
 		if ( is_admin() ) {
 			Admin::instance();
+			Update::instance();
 			Download::instance();
 		}
 	}
