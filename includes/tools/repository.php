@@ -192,17 +192,20 @@ class Repository
 
 				$request  = "https://api.github.com/repos/{$path}/releases";
 				$response = wp_remote_get( $request, $args );
+				$status   = $response['response']['code'] ?? 0;
 
 				if ( is_wp_error( $response ) ) {
 					return $response;
 				}
 
-				$releases = json_decode( wp_remote_retrieve_body( $response ) );
-				$releases = array_filter( (array) $releases, function ( $release ) {
-					return isset( $release->draft ) && false === $release->draft;
-				} );
+				if ( $status > 0 && $status < 400 ) {
+					$releases = json_decode( wp_remote_retrieve_body( $response ) );
+					$releases = array_filter( (array) $releases, function ( $release ) {
+						return isset( $release->draft ) && false === $release->draft;
+					} );
 
-				$this->release = current( $releases );
+					$this->release = current( $releases );
+				}
 			}
 		}
 		return $this->release;
