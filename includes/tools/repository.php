@@ -22,11 +22,6 @@ class Repository
 	protected $release;
 
 	/**
-	 * @var bool True, if If the plugin is active or false otherwise.
-	 */
-	protected $active;
-
-	/**
 	 * Constructor.
 	 */
 	protected function __construct() {
@@ -167,11 +162,8 @@ class Repository
 		$wp_filesystem->move( $result['destination'], $plugin_dir ); // Move files to the plugin dir
 		$result['destination'] = $plugin_dir; // Set the destination for the rest of the stack
 
-		//	Reactivate if the plugin was active
-		if ( $this->active ) {
-			activate_plugin( plugin_basename( Main::FILE ) );
-		}
-
+		//	Reactivate if the plugin
+		activate_plugin( plugin_basename( Main::FILE ) );
 		return $result;
 	}
 
@@ -211,7 +203,6 @@ class Repository
 				} );
 
 				$this->release = current( $releases );
-				$this->active  = is_plugin_active( plugin_basename( Main::FILE ) );
 			}
 		}
 		return $this->release;
