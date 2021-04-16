@@ -2,7 +2,7 @@
 
 [This plugin description]
 
-## Plugin home
+## Plugin repository
 * https://github.com/peroks/wp-plugin-template
 
 ## Authors
