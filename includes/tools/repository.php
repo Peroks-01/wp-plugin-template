@@ -67,15 +67,18 @@ class Repository
 			//	Do we have a valid relase object?
 			if ( empty( is_wp_error( $release ) ) && is_object( $release ) ) {
 				$base    = plugin_basename( Main::FILE );
+				$plugin  = (object) get_plugin_data( Main::FILE );
 				$version = trim( $release->tag_name, 'v' );
 
 				//	Is a newer version available on GitHub?
 				if ( version_compare( $version, Main::VERSION, '>' ) ) {
 					$transient->response[ $base ] = (object) array(
-						'url'         => get_option( self::OPTION_REPOSITORY_URL ),
-						'slug'        => current( explode( '/', $base ) ),
-						'package'     => $release->zipball_url,
-						'new_version' => $version,
+						'url'          => $plugin->PluginURI,
+						'slug'         => current( explode( '/', $base ) ),
+						'plugin'       => $base,
+						'package'      => $release->zipball_url,
+						'new_version'  => $version,
+						'requires_php' => $plugin->RequiresPHP,
 					);
 				}
 			}
@@ -102,7 +105,8 @@ class Repository
 
 			return (object) array(
 				'name'              => $plugin->Name,
-				'slug'              => $base,
+				'slug'              => $slug,
+				'plugin'            => $base,
 				'version'           => trim( $release->tag_name, 'v' ),
 				'author'            => $plugin->AuthorName,
 				'author_profile'    => $plugin->AuthorURI,
