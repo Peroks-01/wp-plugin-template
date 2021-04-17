@@ -4,7 +4,8 @@
  *
  * @author Per Egil Roksvaag
  */
-class Form {
+class Form
+{
 	const FILTER_FORM         = Main::PREFIX . '_form';
 	const FILTER_FORM_FIELD   = Main::PREFIX . '_form_field';
 	const FILTER_FORM_LABEL   = Main::PREFIX . '_form_label';

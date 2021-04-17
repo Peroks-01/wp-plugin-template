@@ -6,7 +6,8 @@
  *
  * @author Per Egil Roksvaag
  */
-class Asset {
+class Asset
+{
 	use Singleton;
 
 	/**

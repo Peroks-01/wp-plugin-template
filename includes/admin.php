@@ -4,7 +4,8 @@
  *
  * @author Per Egil Roksvaag
  */
-class Admin {
+class Admin
+{
 	use Singleton;
 
 	/**

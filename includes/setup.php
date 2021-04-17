@@ -4,7 +4,8 @@
  *
  * @author Per Egil Roksvaag
  */
-class Setup {
+class Setup
+{
 	use Singleton;
 
 	/**

@@ -4,7 +4,8 @@
  *
  * @author Per Egil Roksvaag
  */
-trait Singleton {
+trait Singleton
+{
 	/**
 	 * @var object The class singleton.
 	 */

@@ -4,7 +4,8 @@
  *
  * @author Per Egil Roksvaag
  */
-class Modal {
+class Modal
+{
 	use Singleton;
 
 	/**

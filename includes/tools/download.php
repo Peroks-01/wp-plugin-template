@@ -9,7 +9,8 @@ use ZipArchive;
  *
  * @author Per Egil Roksvaag
  */
-class Download {
+class Download
+{
 	use Singleton;
 
 	/**
