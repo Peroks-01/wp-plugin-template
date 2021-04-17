@@ -42,8 +42,9 @@ class Repository
 		if ( get_option( self::OPTION_REPOSITORY_URL ) ) {
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_plugins' ) );
 			add_filter( 'plugins_api', array( $this, 'plugins_api' ), 10, 3);
+			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 4 );
 			add_filter( 'upgrader_pre_download', array( $this, 'upgrader_pre_download' ), 10, 4 );
-			add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
+			//	add_filter( 'upgrader_post_install', array( $this, 'upgrader_post_install' ), 10, 3 );
 		}
 	}
 
@@ -65,20 +66,17 @@ class Repository
 
 			//	Do we have a valid relase object?
 			if ( empty( is_wp_error( $release ) ) && is_object( $release ) ) {
-				$basename = plugin_basename( Main::FILE );
-				$version  = trim( $release->tag_name, 'v' );
+				$base    = plugin_basename( Main::FILE );
+				$version = trim( $release->tag_name, 'v' );
 
 				//	Is a newer version available on GitHub?
 				if ( version_compare( $version, Main::VERSION, '>' ) ) {
-					$plugin = (object) array(
+					$transient->response[ $base ] = (object) array(
 						'url'         => get_option( self::OPTION_REPOSITORY_URL ),
-						'slug'        => current( explode( '/', $basename ) ),
+						'slug'        => current( explode( '/', $base ) ),
 						'package'     => $release->zipball_url,
 						'new_version' => $version,
 					);
-
-					//	Set plugin update info
-					$transient->response[ $basename ] = $plugin;
 				}
 			}
 		}
@@ -99,26 +97,46 @@ class Repository
 		$slug = current( explode( '/', $base ) );
 
 		if ( property_exists( $args, 'slug' ) && $args->slug == $slug ) {
-			$data    = get_plugin_data( Main::FILE );
+			$plugin  = (object) get_plugin_data( Main::FILE );
 			$release = $this->get_latest_release();
 
 			return (object) array(
-				'name'              => $data['Name'],
+				'name'              => $plugin->Name,
 				'slug'              => $base,
 				'version'           => trim( $release->tag_name, 'v' ),
-				'author'            => $data['AuthorName'],
-				'author_profile'    => $data['AuthorURI'],
+				'author'            => $plugin->AuthorName,
+				'author_profile'    => $plugin->AuthorURI,
 				'last_updated'      => $release->published_at,
-				'homepage'          => $data['PluginURI'],
-				'short_description' => $data['Description'],
+				'homepage'          => $plugin->PluginURI,
+				'short_description' => $plugin->Description,
 				'sections'          => array(
-					'Description' => $data['Description'],
+					'Description' => $plugin->Description,
 					'Updates'     => $release->body,
 				),
 				'download_link' => $release->zipball_url,
 			);
 		}
 		return $result;
+	}
+
+	/**
+	 * Filters the source file location for the upgrade package.
+	 *
+	 * @param string $source File source location.
+	 * @param string $remote_source Remote file source location.
+	 * @param WP_Upgrader $upgrader WP_Upgrader instance.
+	 * @param array $hook_extra Extra arguments passed to hooked filters.
+	 */
+	public function upgrader_source_selection( $source, $remote_source, $upgrader, $hook_extra ) {
+		$plugin = $hook_extra['plugin'] ?? null;
+		$base   = plugin_basename( Main::FILE );
+
+		if ( $base === $plugin ) {
+			$slug   = current( explode( '/', $base ) );
+			$source = dirname( $source ) . '/' . $slug;
+		}
+
+		return $source;
 	}
 
 	/**
@@ -130,18 +148,16 @@ class Repository
 	 * @param array $hook_extra Extra arguments passed to hooked filters.
 	 */
 	public function upgrader_pre_download ( $reply, $package, $upgrader, $hook_extra ) {
-		if ( $token = get_option( self::OPTION_REPOSITORY_TOKEN ) ) {
-			$release = $this->get_latest_release();
-			$base    = plugin_basename( Main::FILE );
+		$plugin = $hook_extra['plugin'] ?? null;
+		$base   = plugin_basename( Main::FILE );
 
-			if ( in_array( $base, $hook_extra ) && $package == $release->zipball_url ) {
-				add_filter( 'http_request_args', function ( $args, $url ) use ( $release, $token ) {
-					if ( isset( $args['filename'] ) && $url == $release->zipball_url ) {
-						$args['headers']['Authorization'] = "token {$token}";
-					}
-					return $args;
-				}, 10, 2 );
-			}
+		if ( $base === $plugin && $token = get_option( self::OPTION_REPOSITORY_TOKEN ) ) {
+			add_filter( 'http_request_args', function ( $args, $url ) use ( $package, $token ) {
+				if ( isset( $args['filename'] ) && $url === $package ) {
+					$args['headers']['Authorization'] = "token {$token}";
+				}
+				return $args;
+			}, 10, 2 );
 		}
 
 		return $reply;
@@ -158,13 +174,18 @@ class Repository
 	public function upgrader_post_install( $response, $hook_extra, $result ) {
 		global $wp_filesystem;
 
-		$plugin_dir = Main::instance()->plugin_path(); // Our plugin directory
-		$wp_filesystem->move( $result['destination'], $plugin_dir ); // Move files to the plugin dir
-		$result['destination'] = $plugin_dir; // Set the destination for the rest of the stack
+		$base = plugin_basename( Main::FILE );
 
-		//	Reactivate if the plugin
-		activate_plugin( plugin_basename( Main::FILE ) );
-		return $result;
+		if ( in_array( $base, $hook_extra ) ) {
+			$target = Main::instance()->plugin_path(); // Our plugin directory
+			$wp_filesystem->move( $result['destination'], $target ); // Move files to the plugin dir
+			$result['destination'] = $target; // Set the destination for the rest of the stack
+
+			//	Reactivate the plugin
+			activate_plugin( $base );
+			return $result;
+		}
+		return $response;
 	}
 
 	/* -------------------------------------------------------------------------
@@ -192,13 +213,13 @@ class Repository
 
 				$request  = "https://api.github.com/repos/{$path}/releases";
 				$response = wp_remote_get( $request, $args );
-				$status   = $response['response']['code'] ?? 0;
+				$status   = wp_remote_retrieve_response_code( $response );
 
 				if ( is_wp_error( $response ) ) {
 					return $response;
 				}
 
-				if ( $status > 0 && $status < 400 ) {
+				if ( $status && $status < 400 ) {
 					$releases = json_decode( wp_remote_retrieve_body( $response ) );
 					$releases = array_filter( (array) $releases, function ( $release ) {
 						return isset( $release->draft ) && false === $release->draft;

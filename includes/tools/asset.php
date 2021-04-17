@@ -83,7 +83,7 @@ class Asset {
 	/**
 	 * Registers styles for inlining.
 	 *
-	 * @see Main::enqueue_style()
+	 * @see Asset::enqueue_style()
 	 *
 	 * @param string $handle A stylesheet handle.
 	 * @param string $path The stylesheet file system path.
@@ -120,7 +120,7 @@ class Asset {
 	/**
 	 * Registers styles for defer or async.
 	 *
-	 * @see Main::enqueue_script()
+	 * @see Asset::enqueue_script()
 	 *
 	 * @param string $handle A JavaScript handle.
 	 * @param string $path The JavaScript file system path.
