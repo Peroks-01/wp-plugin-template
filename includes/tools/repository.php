@@ -253,7 +253,7 @@ class Repository
 			'option'      => self::OPTION_REPOSITORY_TOKEN,
 			'section'     => self::SECTION_REPOSITORY,
 			'page'        => Admin::PAGE,
-			'label'       => __( 'GitHub access Token', '[plugin-text-domain]' ),
+			'label'       => __( 'GitHub access token', '[plugin-text-domain]' ),
 			'description' => __( 'Enter an access token for the plugin repository on GitHub.', '[plugin-text-domain]' ),
 		) );
 	}

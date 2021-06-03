@@ -440,6 +440,34 @@ class Form
 	 * @return array An array with the allowed attributes as keys.
 	 */
 	protected static function whitelist( string $type ) {
+		$global = array(
+			'accesskey'       => 'Provides a hint for generating a keyboard shortcut for the current element',
+			'autocapitalize'  => 'Controls whether and how text input is automatically capitalized',
+			'class'           => 'A space-separated list of the classes of the element',
+			'contenteditable' => 'An enumerated attribute indicating if the element should be editable by the user',
+			'dir'             => 'An enumerated attribute indicating the directionality of the element\'s text',
+			'draggable'       => 'An enumerated attribute indicating whether the element can be dragged',
+			'enterkeyhint'    => 'Hints what action label (or icon) to present for the enter key on virtual keyboards',
+			'hidden'          => 'A Boolean attribute indicates that the element is not yet, or is no longer, relevant',
+			'id'              => 'Defines a unique identifier (ID) which must be unique in the whole document',
+			'inputmode'       => 'Provides a hint to browsers as to the type of virtual keyboard configuration to use',
+			'is'              => 'Allows you to specify that a standard HTML element should behave like a registered custom built-in element',
+			'itemid'          => 'The unique, global identifier of an item',
+			'itemprop'        => 'Used to add properties to an item',
+			'itemref'         => 'Properties can be associated with the item using an itemref',
+			'itemscope'       => 'Specify that the HTML contained in a block is about a particular item',
+			'itemtype'        => 'Specifies the URL of the vocabulary',
+			'lang'            => 'Helps define the language of an element',
+			'nonce'           => 'A cryptographic nonce',
+			'part'            => 'A space-separated list of the part names of the element',
+			'slot'            => 'Assigns a slot in a shadow DOM shadow tree to an element',
+			'spellcheck'      => 'An enumerated attribute defines whether the element may be checked for spelling errors',
+			'style'           => 'Contains CSS styling declarations to be applied to the element',
+			'tabindex'        => 'An integer attribute indicating if the element can take input focus',
+			'title'           => 'Contains a text representing advisory information related to the element it belongs to',
+			'translate'       => 'An enumerated attribute',
+		);
+
 		$all = array(
 			'autocomplete' => 'Hint for form autofill feature',
 			'autofocus'    => 'Automatically focus the form control when the page is loaded',
@@ -520,25 +548,25 @@ class Form
 			case 'email':
 			case 'date':
 			case 'password':
-				return array_merge( $all, $input, $text );
+				return array_merge( $global, $all, $input, $text );
 			case 'number':
-				return array_merge( $all, $input, $text, $number );
+				return array_merge( $global, $all, $input, $text, $number );
 			case 'file':
-				return array_merge( $all, $input, $file );
+				return array_merge( $global, $all, $input, $file );
 			case 'checkbox':
 			case 'radio':
-				return array_merge( $all, $input, $check );
+				return array_merge( $global, $all, $input, $check );
 			case 'image':
-				return array_merge( $all, $submit, $image );
+				return array_merge( $global, $all, $submit, $image );
 			case 'textarea':
-				return array_merge( $all, $text, $textarea );
+				return array_merge( $global, $all, $text, $textarea );
 			case 'select':
-				return array_merge( $all );
+				return array_merge( $global, $all );
 			case 'submit':
 			case 'button':
-				return array_merge( $all, $submit );
+				return array_merge( $global, $all, $submit );
 			case 'form':
-				return $form;
+				return array_merge( $global, $form );
 			default:
 				return array();
 		}
